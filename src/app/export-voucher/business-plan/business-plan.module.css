@@ -1,0 +1,213 @@
+.container {
+  max-width: 990px; /* 더 넓은 화면 사용 */
+  margin: 0 auto;
+  padding: 40px;
+  background: white;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  color: #333;
+  line-height: 1.6;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+  border-bottom: 3px double #333;
+  padding-bottom: 20px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: #666;
+}
+
+.section {
+  margin-bottom: 40px;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 700;
+  border-left: 4px solid #3b82f6;
+  padding-left: 10px;
+  margin-bottom: 20px;
+  background: #f8f9fa;
+  padding: 10px;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 120px 1fr 120px 1fr;
+  border-top: 2px solid #333;
+  border-left: 1px solid #ddd;
+}
+
+.formRow {
+  display: contents;
+}
+
+.label {
+  background: #f4f6f9;
+  padding: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  border-bottom: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+}
+
+.value {
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+}
+
+.input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.fullWidth {
+  grid-column: span 3;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 150px;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  resize: vertical;
+  line-height: 1.6;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  border-top: 2px solid #333;
+}
+
+.table th {
+  background: #f4f6f9;
+  padding: 10px;
+  font-weight: 600;
+  border-bottom: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+  text-align: center;
+  font-size: 14px;
+}
+
+.table td {
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+}
+
+.table td:last-child, .table th:last-child {
+  border-right: none;
+}
+
+.helperText {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 8px;
+  background: #fff8e1;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.buttonArea {
+  margin-top: 40px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.saveButton {
+  background: #3b82f6;
+  color: white;
+  padding: 12px 30px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.saveButton:hover {
+  background: #2563eb;
+}
+
+.printButton {
+  background: #333;
+  color: white;
+  padding: 12px 30px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.printButton:hover {
+  background: #111;
+}
+
+@media print {
+  .container {
+    width: 100%;
+    max-width: none;
+    box-shadow: none;
+    padding: 20mm;
+  }
+  .printButton, .saveButton, .helperText, .buttonArea {
+    display: none !important;
+  }
+  .input, .textarea {
+    border: none !important;
+    padding: 4px 0 !important;
+    resize: none;
+    background: transparent;
+  }
+  .sectionTitle {
+    break-after: avoid;
+  }
+  .section {
+    break-inside: avoid;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 20px;
+    max-width: 100%;
+  }
+  
+  .formGrid {
+    grid-template-columns: 100px 1fr;
+  }
+  
+  .fullWidth {
+    grid-column: span 1;
+  }
+}

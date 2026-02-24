@@ -1,65 +1,127 @@
-import Image from "next/image";
+import Navbar from '@/components/Navbar';
+import Hero from '@/components/Hero';
+import Footer from '@/components/Footer';
+import HomeClientContent from '@/components/HomeClientContent';
+import ReviewsSection from '@/components/ReviewsSection';
+import Link from 'next/link';
 
-export default function Home() {
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  originalPrice?: number;
+  thumbnail: string;
+  category: string;
+  badge?: string;
+  reviewCount: number;
+  rating: number;
+}
+
+// 카테고리
+const categories = [
+  { name: '인쇄', href: '/shop?category=print', icon: '🖨️' },
+  { name: '굿즈/팬시', href: '/shop?category=goods', icon: '✨' },
+  { name: '패션/어패럴', href: '/shop?category=fashion', icon: '👕' },
+  { name: '우리가게', href: '/shop?category=store', icon: '🏪' },
+  { name: '주문제작', href: '/shop?category=custom', icon: '🎨' },
+  { name: 'AI 레시피', href: '/shop?category=recipe', icon: '📚' },
+];
+
+// 고객 리뷰
+const reviews = [
+  {
+    name: '김*현',
+    product: '에코백',
+    rating: 5,
+    content: 'AI로 만든 디자인이 너무 예뻐요! 주변에서 어디서 샀냐고 물어봐요 ㅎㅎ',
+    date: '2026.01.05'
+  },
+  {
+    name: '이*진',
+    product: '반팔 티셔츠',
+    rating: 5,
+    content: '프린팅 퀄리티가 생각보다 훨씬 좋아서 놀랐어요. 재주문할게요!',
+    date: '2026.01.03'
+  },
+  {
+    name: '박*수',
+    product: '캔버스 액자',
+    rating: 5,
+    content: '거실에 걸어놨는데 분위기가 확 바뀌었어요. AI가 그린 그림이라고 하니까 다들 신기해해요.',
+    date: '2025.12.28'
+  },
+];
+
+async function getHomeProducts() {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3300';
+
+  try {
+    // 3개의 API 요청 병렬 처리
+    const [aiGoodsRes, bestRes, allRes] = await Promise.all([
+      fetch(`${baseUrl}/api/products?type=new&limit=8`, { cache: 'no-store' }),
+      fetch(`${baseUrl}/api/products?type=best&limit=6`, { cache: 'no-store' }),
+      fetch(`${baseUrl}/api/products?limit=6`, { cache: 'no-store' }),
+    ]);
+
+    const [aiGoodsData, bestData, allData] = await Promise.all([
+      aiGoodsRes.json(),
+      bestRes.json(),
+      allRes.json(),
+    ]);
+
+    return {
+      aiGoodsItems: aiGoodsData.success ? aiGoodsData.products : [],
+      bestProducts: bestData.success ? bestData.products : [],
+      allProducts: allData.success ? allData.products : [],
+    };
+  } catch (error) {
+    console.error('Failed to fetch home products:', error);
+    return {
+      aiGoodsItems: [],
+      bestProducts: [],
+      allProducts: [],
+    };
+  }
+}
+
+export default async function Home() {
+  const { aiGoodsItems, bestProducts, allProducts } = await getHomeProducts();
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="min-h-screen bg-white selection:bg-emerald-100 selection:text-emerald-900">
+      <Navbar />
+      <Hero />
+
+      {/* Category Quick Links */}
+      <section className="py-8 bg-white border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap justify-center gap-4 md:gap-8">
+            {categories.map((cat) => (
+              <Link
+                key={cat.name}
+                href={cat.href}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-50 hover:bg-emerald-50 hover:text-emerald-700 transition-all text-gray-700 font-medium"
+              >
+                <span>{cat.icon}</span>
+                <span>{cat.name}</span>
+              </Link>
+            ))}
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </section>
+
+      {/* Client Component로 전달하여 animation 유지 */}
+      <HomeClientContent
+        aiGoodsItems={aiGoodsItems}
+        bestProducts={bestProducts}
+        allProducts={allProducts}
+        reviews={reviews}
+      />
+
+      {/* 고객 리뷰 섹션 */}
+      <ReviewsSection />
+
+      <Footer />
+    </main>
   );
 }

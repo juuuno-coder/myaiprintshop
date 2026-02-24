@@ -1,0 +1,251 @@
+.container {
+  padding: 40px 0;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.header h3 {
+  font-size: 1.5rem;
+  color: #111;
+  margin: 0;
+  font-weight: 700;
+}
+
+.sourceBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #666;
+  background: #f5f5f5;
+  padding: 6px 14px;
+  border-radius: 20px;
+}
+
+.sourceLogo {
+  color: #3b82f6;
+  font-weight: 800;
+  font-family: sans-serif;
+}
+
+.ratingOverview {
+  background: linear-gradient(135deg, #fefefe 0%, #f8f9fa 100%);
+  border: 1px solid #eee;
+  padding: 36px;
+  border-radius: 16px;
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.bigRating {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: #111;
+  line-height: 1;
+}
+
+.stars {
+  font-size: 1.3rem;
+  color: #fbbf24;
+  margin: 8px 0;
+}
+
+.countText {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.sectionTitle {
+  font-size: 1.15rem;
+  color: #111;
+  margin-bottom: 20px;
+  border-left: 4px solid #3b82f6;
+  padding-left: 12px;
+  font-weight: 600;
+}
+
+/* Photo Grid */
+.photoGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.photoCard {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  background: white;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.photoCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+}
+
+.photoWrapper {
+  position: relative;
+  height: 200px;
+  width: 100%;
+}
+
+.photoImg {
+  object-fit: cover;
+}
+
+.photoOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.85));
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.photoUser {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.photoRating {
+  font-size: 0.8rem;
+}
+
+.photoContent {
+  padding: 16px;
+  font-size: 0.9rem;
+  color: #555;
+  background: white;
+  line-height: 1.5;
+}
+
+/* Review List */
+.reviewList {
+  display: flex;
+  flex-direction: column;
+}
+
+.reviewItem {
+  padding: 28px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.reviewHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.name {
+  font-weight: 700;
+  color: #111;
+}
+
+.date {
+  color: #999;
+  font-size: 0.85rem;
+}
+
+.sourceTag {
+  font-size: 0.75rem;
+  color: #3b82f6;
+  background: #eff6ff;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.aiTag {
+  font-size: 0.75rem;
+  color: #8b5cf6;
+  background: #f5f3ff;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.content {
+  color: #444;
+  line-height: 1.7;
+  font-size: 1rem;
+  margin-bottom: 16px;
+}
+
+.reviewImages {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.thumbWrapper {
+  width: 80px;
+  height: 80px;
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.thumbWrapper:hover {
+  transform: scale(1.05);
+}
+
+.reviewImg {
+  object-fit: cover;
+}
+
+/* Empty State */
+.emptyState {
+  text-align: center;
+  padding: 60px 20px;
+  color: #888;
+}
+
+.emptyState h4 {
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+  color: #666;
+}
+
+@media (max-width: 768px) {
+  .photoGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .ratingOverview {
+    padding: 24px;
+  }
+  
+  .bigRating {
+    font-size: 2.5rem;
+  }
+  
+  .container {
+    padding: 24px 16px;
+  }
+}
