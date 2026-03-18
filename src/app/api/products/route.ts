@@ -35,6 +35,8 @@ function mockToProduct(mock: typeof MOCK_PRODUCTS[0]): Product {
     isActive: true,
     reviewCount: mock.reviewCount,
     rating: mock.rating,
+    vendorId: 'PLATFORM_DEFAULT',
+    vendorType: 'platform',
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -176,7 +178,9 @@ export async function POST(request: NextRequest) {
       options: body.options || {
         sizes: ['S', 'M', 'L', 'XL'],
         colors: [{ name: 'White', hex: '#FFFFFF' }]
-      }
+      },
+      vendorId: body.vendorId || 'PLATFORM_DEFAULT',
+      vendorType: body.vendorType || 'platform'
     });
 
     if (!productId) {

@@ -1,78 +1,115 @@
-import { initializeApp, getApps, cert, type App } from "firebase-admin/app";
-import { getAuth, type Auth } from "firebase-admin/auth";
-import { getFirestore, type Firestore } from "firebase-admin/firestore";
+// Dynamic import로 변경하여 Windows 권한 문제 회피
+let admin: typeof import('firebase-admin') | null = null;
 
-let adminApp: App;
-let adminAuth: Auth;
-let adminDb: Firestore;
+/**
+ * Firebase Admin SDK 초기화
+ * 서버 사이드에서만 사용 (API routes, Server Actions 등)
+ */
 
-function getAdminApp() {
-  if (!getApps().length) {
-    // firebase-admin은 환경변수 또는 서비스 계정 JSON으로 초기화
-    // Vercel 등 배포 환경에서는 GOOGLE_APPLICATION_CREDENTIALS 또는 개별 환경변수 사용
-    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+// 싱글톤 인스턴스
+let adminApp: any | null = null;
 
-    if (process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT) {
-      const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT);
-      adminApp = initializeApp({
-        credential: cert(serviceAccount),
-        projectId,
-      });
-    } else {
-      // 환경변수가 없는 경우 기본 초기화 (로컬 개발용)
-      adminApp = initializeApp({ projectId });
+export async function getAdminApp(): Promise<any> {
+  if (adminApp) {
+    return adminApp;
+  }
+
+  // 환경변수 확인
+  const clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL;
+  const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY;
+  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+
+  if (!clientEmail || !privateKey || !projectId ||
+      clientEmail === 'your-service-account@myaiprintshop.iam.gserviceaccount.com') {
+    console.warn('⚠️ Firebase Admin SDK credentials not configured. Using development mode.');
+    // 개발 모드에서는 Admin SDK 없이 작동 (auth-middleware에서 fallback 처리)
+    throw new Error('Firebase Admin SDK not configured');
+  }
+
+  try {
+    // Dynamic import
+    if (!admin) {
+      admin = await import('firebase-admin');
     }
-  } else {
-    adminApp = getApps()[0];
-  }
-  return adminApp;
-}
 
-export function getAdminAuth(): Auth {
-  if (!adminAuth) {
-    adminAuth = getAuth(getAdminApp());
-  }
-  return adminAuth;
-}
+    // 기존 앱이 있으면 재사용
+    if (admin.apps.length > 0) {
+      adminApp = admin.apps[0]!;
+      return adminApp;
+    }
 
-export function getAdminDb(): Firestore {
-  if (!adminDb) {
-    adminDb = getFirestore(getAdminApp());
-  }
-  return adminDb;
-}
+    // 새 앱 초기화
+    adminApp = admin.initializeApp({
+      credential: admin.credential.cert({
+        projectId,
+        clientEmail,
+        privateKey: privateKey.replace(/\\n/g, '\n'), // 환경변수의 \n을 실제 개행으로 변환
+      }),
+      projectId,
+    });
 
-/**
- * Firebase ID Token을 검증하고 사용자 정보를 반환합니다.
- */
-export async function verifyIdToken(token: string) {
-  try {
-    const auth = getAdminAuth();
-    return await auth.verifyIdToken(token);
-  } catch {
-    return null;
+    console.log('✅ Firebase Admin SDK initialized');
+    return adminApp;
+  } catch (error) {
+    console.error('❌ Failed to initialize Firebase Admin SDK:', error);
+    throw error;
   }
 }
 
 /**
- * 사용자가 관리자인지 확인합니다.
- * Firestore `admins` 컬렉션에 해당 이메일이 등록되어 있는지 확인합니다.
- * 환경변수 ADMIN_EMAILS를 폴백으로 사용합니다.
+ * Firebase Admin Auth
  */
-export async function isAdminUser(email: string): Promise<boolean> {
-  // 1. 환경변수에서 관리자 이메일 확인 (서버사이드에서만 접근 가능)
-  const adminEmails = process.env.ADMIN_EMAILS?.split(",").map(e => e.trim()) || [];
-  if (adminEmails.includes(email)) {
-    return true;
-  }
+export async function getAdminAuth(): Promise<any> {
+  const app = await getAdminApp();
+  return app.auth();
+}
 
-  // 2. Firestore admins 컬렉션 확인
+/**
+ * Firebase Admin Firestore
+ */
+export async function getAdminFirestore(): Promise<any> {
+  const app = await getAdminApp();
+  return app.firestore();
+}
+
+/**
+ * ID 토큰 검증
+ */
+export async function verifyIdToken(token: string): Promise<any> {
   try {
-    const db = getAdminDb();
-    const adminDoc = await db.collection("admins").doc(email).get();
-    return adminDoc.exists;
-  } catch {
-    // Firestore 사용 불가 시 환경변수만으로 판단
-    return false;
+    const auth = await getAdminAuth();
+    const decodedToken = await auth.verifyIdToken(token);
+    return decodedToken;
+  } catch (error) {
+    console.error('❌ Token verification failed:', error);
+    throw new Error('Invalid or expired token');
+  }
+}
+
+/**
+ * 사용자 정보 조회
+ */
+export async function getAdminUser(uid: string): Promise<any> {
+  try {
+    const auth = await getAdminAuth();
+    const user = await auth.getUser(uid);
+    return user;
+  } catch (error) {
+    console.error(`❌ Failed to get user ${uid}:`, error);
+    throw new Error('User not found');
+  }
+}
+
+/**
+ * 사용자 커스텀 클레임 설정 (역할 관리)
+ */
+export async function setUserClaims(uid: string, claims: Record<string, any>): Promise<void> {
+  try {
+    const auth = await getAdminAuth();
+    await auth.setCustomUserClaims(uid, claims);
+    console.log(`✅ Custom claims set for user ${uid}:`, claims);
+  } catch (error) {
+    console.error(`❌ Failed to set custom claims for user ${uid}:`, error);
+    throw error;
   }
 }
