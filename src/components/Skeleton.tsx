@@ -27,7 +27,7 @@ export function Skeleton({
       transition: {
         duration: 1.5,
         repeat: Infinity,
-        ease: [0.4, 0, 0.2, 1] as const, // easeInOut cubic-bezier
+        ease: [0.4, 0, 0.2, 1], // easeInOut cubic-bezier
       },
     },
     wave: {
@@ -35,16 +35,16 @@ export function Skeleton({
       transition: {
         duration: 1.5,
         repeat: Infinity,
-        ease: [0, 0, 1, 1] as const, // linear cubic-bezier
+        ease: [0, 0, 1, 1], // linear cubic-bezier
       },
     },
     none: {},
-  } as const;
+  };
 
   return (
     <motion.div
       className={`${baseClasses} ${variantClasses[variant]} ${className}`}
-      animate={animationVariants[animation]}
+      animate={animationVariants[animation] as any}
     />
   );
 }
