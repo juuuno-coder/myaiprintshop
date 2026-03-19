@@ -8,7 +8,7 @@ import {
   getOrderStats
 } from '@/lib/orders';
 import { OrderStatus } from '@/lib/payment';
-import { requireAdmin } from '@/lib/auth-middleware';
+import { requireAdmin, unauthorizedResponse } from '@/lib/auth-middleware';
 
 // GET: 주문 목록 조회
 export async function GET(request: NextRequest) {
@@ -73,11 +73,13 @@ export async function GET(request: NextRequest) {
 }
 
 // PATCH: 주문 상태 업데이트 (관리자 전용)
-export async function PATCH(request: NextRequest) {
+export async function PATCH(request: NextRequest): Promise<NextResponse> {
   try {
     // 관리자 인증 검사
-    const authError = await requireAdmin(request);
-    if (authError) return authError;
+    const authResult = await requireAdmin(request);
+    if (!authResult.authorized) {
+      return unauthorizedResponse(authResult.error);
+    }
 
     const body = await request.json();
     const { orderId, status, trackingNumber, carrier } = body;
