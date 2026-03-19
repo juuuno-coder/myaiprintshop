@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth-middleware";
+import { requireAdmin, unauthorizedResponse } from "@/lib/auth-middleware";
 import { getOrders } from "@/lib/orders";
 
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   // 관리자 인증 검사
-  const authError = await requireAdmin(request);
-  if (authError) return authError;
+  const authResult = await requireAdmin(request);
+  if (!authResult.authorized) {
+    return unauthorizedResponse(authResult.error);
+  }
 
   try {
     const orders = await getOrders();
