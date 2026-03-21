@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: PartnerProductsPageProps): Pr
     const partnerDoc = await getDoc(doc(db, 'api_partners', partnerId));
 
     if (partnerDoc.exists()) {
-      const partnerData = partnerDoc.data();
+      const partnerData = partnerDoc.data() as any;
       return {
         title: `상품 목록 | ${partnerData.name || partnerId}`,
         description: `${partnerData.name || partnerId}에서 제공하는 AI 기반 인쇄 상품`,
@@ -38,7 +38,7 @@ export default async function PartnerProductsPage({ params }: PartnerProductsPag
   // 파트너 정보 조회
   const partnerDoc = await getDoc(doc(db, 'api_partners', partnerId));
 
-  if (!partnerDoc.exists() || partnerDoc.data().status !== 'active') {
+  if (!partnerDoc.exists() || (partnerDoc.data() as any).status !== 'active') {
     return (
       <div className="max-w-4xl mx-auto px-4 py-12">
         <div className="text-center">
@@ -56,7 +56,7 @@ export default async function PartnerProductsPage({ params }: PartnerProductsPag
 
   const partnerData = {
     id: partnerDoc.id,
-    ...partnerDoc.data(),
+    ...(partnerDoc.data() as any),
   };
 
   // 파트너 상품 조회 (파트너가 판매 허가된 상품)
@@ -70,7 +70,7 @@ export default async function PartnerProductsPage({ params }: PartnerProductsPag
   const productsSnapshot = await getDocs(productsQuery);
   const products = productsSnapshot.docs.map((doc) => ({
     id: doc.id,
-    ...doc.data(),
+    ...(doc.data() as any),
   }));
 
   return (

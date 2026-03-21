@@ -374,4 +374,5 @@ if (typeof window !== 'undefined') {
   console.log('✅ MyAIPrintShop Buy Button SDK loaded');
 }
 
-export { BuyButtonSDK, BuyButtonConfig };
+export { BuyButtonSDK };
+export type { BuyButtonConfig };
