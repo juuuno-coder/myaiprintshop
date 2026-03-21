@@ -22,13 +22,13 @@ export async function generateMetadata({
       getDoc(doc(db, 'products', productId)),
     ]);
 
-    const partnerName = partnerDoc.exists() ? partnerDoc.data().name : partnerId;
-    const productName = productDoc.exists() ? productDoc.data().name : '상품';
+    const partnerName = partnerDoc.exists() ? (partnerDoc.data() as any).name : partnerId;
+    const productName = productDoc.exists() ? (productDoc.data() as any).name : '상품';
 
     return {
       title: `${productName} | ${partnerName}`,
       description: productDoc.exists()
-        ? productDoc.data().description
+        ? (productDoc.data() as any).description
         : '상품 상세 정보',
     };
   } catch (error) {
@@ -47,25 +47,25 @@ export default async function PartnerProductDetailPage({
   // 파트너 정보 조회
   const partnerDoc = await getDoc(doc(db, 'api_partners', partnerId));
 
-  if (!partnerDoc.exists() || partnerDoc.data().status !== 'active') {
+  if (!partnerDoc.exists() || (partnerDoc.data() as any).status !== 'active') {
     redirect('/');
   }
 
   const partnerData = {
     id: partnerDoc.id,
-    ...partnerDoc.data(),
+    ...(partnerDoc.data() as any),
   };
 
   // 상품 정보 조회
   const productDoc = await getDoc(doc(db, 'products', productId));
 
-  if (!productDoc.exists() || !productDoc.data().isActive) {
+  if (!productDoc.exists() || !(productDoc.data() as any).isActive) {
     redirect(`/partner/${partnerId}/products`);
   }
 
   const product = {
     id: productDoc.id,
-    ...productDoc.data(),
+    ...(productDoc.data() as any),
   };
 
   return (

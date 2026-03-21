@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: PartnerHomeProps): Promise<Me
     const partnerDoc = await getDoc(doc(db, 'api_partners', partnerId));
 
     if (partnerDoc.exists()) {
-      const partnerData = partnerDoc.data();
+      const partnerData = partnerDoc.data() as any;
       return {
         title: `${partnerData.name || partnerId} | MyAIPrintShop`,
         description: `${partnerData.name || partnerId}에서 제공하는 AI 기반 인쇄 서비스`,
@@ -56,7 +56,7 @@ export default async function PartnerHomePage({ params }: PartnerHomeProps) {
 
     partnerData = {
       id: partnerDoc.id,
-      ...partnerDoc.data(),
+      ...(partnerDoc.data() as any),
     };
 
     // 파트너가 비활성 상태면 메인 사이트로 리다이렉트
