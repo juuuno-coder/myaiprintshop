@@ -24,21 +24,8 @@ export default function ReviewsSection() {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        // Firestore에서 리뷰 가져오기 (추후 API로 변경)
-        const { initializeApp } = await import('firebase/app');
-        const { getFirestore, collection, getDocs, query, orderBy, limit } = await import('firebase/firestore');
-
-        const firebaseConfig = {
-          apiKey: "AIzaSyBniRDTvu-VyRsrRjZ7tABCJPPMcS0w9yk",
-          authDomain: "myaiprintshop.firebaseapp.com",
-          projectId: "myaiprintshop",
-          storageBucket: "myaiprintshop.firebasestorage.app",
-          messagingSenderId: "436157113796",
-          appId: "1:436157113796:web:0f1c03b91632a5e0aff091",
-        };
-
-        const app = initializeApp(firebaseConfig, 'reviews-app');
-        const db = getFirestore(app);
+        const { collection, getDocs, query, orderBy, limit } = await import('firebase/firestore');
+        const { db } = await import('@/lib/firebase');
 
         const reviewsQuery = query(
           collection(db, 'reviews'),
@@ -126,11 +113,11 @@ export default function ReviewsSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* 섹션 헤더 */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-100 text-emerald-700 font-medium mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-100 text-purple-700 font-medium mb-4">
             <ShieldCheck className="w-4 h-4" />
             <span className="text-sm">구매 인증 고객 리뷰</span>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4">
             고객들의 생생한 후기
           </h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
@@ -182,7 +169,7 @@ export default function ReviewsSection() {
                           transition={{ duration: 0.8, delay: (5 - starNum) * 0.1, ease: 'easeOut' }}
                           className={`h-full rounded-full ${
                             starNum >= 4
-                              ? 'bg-emerald-500'
+                              ? 'bg-purple-500'
                               : starNum === 3
                               ? 'bg-amber-400'
                               : 'bg-red-400'
@@ -222,7 +209,7 @@ export default function ReviewsSection() {
                       alt={currentReview.productName}
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute top-4 right-4 bg-emerald-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                    <div className="absolute top-4 right-4 bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-bold">
                       구매 인증
                     </div>
                   </div>
@@ -291,13 +278,13 @@ export default function ReviewsSection() {
             onClick={goToPrevious}
             className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 w-12 h-12 rounded-full bg-white shadow-lg hover:shadow-xl transition-all flex items-center justify-center group"
           >
-            <ChevronLeft className="w-6 h-6 text-gray-600 group-hover:text-emerald-600 transition-colors" />
+            <ChevronLeft className="w-6 h-6 text-gray-600 group-hover:text-purple-600 transition-colors" />
           </button>
           <button
             onClick={goToNext}
             className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 w-12 h-12 rounded-full bg-white shadow-lg hover:shadow-xl transition-all flex items-center justify-center group"
           >
-            <ChevronRight className="w-6 h-6 text-gray-600 group-hover:text-emerald-600 transition-colors" />
+            <ChevronRight className="w-6 h-6 text-gray-600 group-hover:text-purple-600 transition-colors" />
           </button>
 
           {/* 점 네비게이션 */}
@@ -308,7 +295,7 @@ export default function ReviewsSection() {
                 onClick={() => setCurrentIndex(index)}
                 className={`transition-all ${
                   index === currentIndex
-                    ? 'w-8 h-2 bg-emerald-600 rounded-full'
+                    ? 'w-8 h-2 bg-purple-600 rounded-full'
                     : 'w-2 h-2 bg-gray-300 rounded-full hover:bg-gray-400'
                 }`}
               />
