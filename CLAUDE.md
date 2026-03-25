@@ -1,3 +1,15 @@
+## 전략 문서 (개발 전 반드시 숙지)
+- **전략 진단 리포트**: `data/STRATEGY_ANALYSIS.md`
+- **PM 공통 지침**: 맥미니 루트 `pm.md`
+
+### 전략 핵심 요약
+- 타겟: 개인 크리에이터 & 사이드 비즈니스 운영자 (Beachhead 우선)
+- GTM: PLG 기반 무료 AI 생성 → 구매 유도 (SLG 병행)
+- 리스크: 제품-시장 적합성 검증 부족 — **Phase 1(1개월)에서 50명 사용자 확보 필수**
+- 우선순위: 코드보다 고객 인터뷰(10명) + 랜딩페이지 + 인쇄사 파트너십 선 확보
+
+---
+
 # MyAIPrintShop - Claude Code 워크플로우 가이드
 
 ## 프로젝트 개요
@@ -233,6 +245,54 @@ bun run migrate:vendors --filter=@vibers/myaiprintshop
 ### 배포
 - 현재: Vercel
 - 최종: NCP Docker (server.vibers.co.kr)
+
+---
+
+## AI Recipe 이미지 API
+
+이 프로젝트는 **AI Recipe 중앙 이미지 서비스**를 사용합니다.
+
+### 사용 가능한 함수
+
+```typescript
+import { searchStockImage, generateAIImage } from '@/lib/ai-recipe-client';
+```
+
+### Stock Image 검색
+```typescript
+const image = await searchStockImage('custom print design', {
+  orientation: 'landscape',
+  size: 'medium',
+});
+// → { url, provider, alt, photographer, ... }
+```
+
+### AI 이미지 생성
+```typescript
+const image = await generateAIImage('minimalist tote bag design pattern', {
+  size: 'large',
+  provider: 'auto',
+});
+// → { url, prompt, provider }
+```
+
+### 주의사항
+- Server Action이나 API Route에서만 사용 (API 키 보호)
+- Rate Limit: 1000회/일 (myaiprintshop 프로젝트 전체)
+- AI Recipe 서버 실행 필요: http://localhost:3300
+
+### 실전 예제
+```typescript
+// 디자인 템플릿 배경 이미지
+const background = await searchStockImage('abstract pattern background', {
+  orientation: 'squarish'
+});
+
+// 상품 썸네일 AI 생성
+const thumbnail = await generateAIImage(
+  'professional product mockup, custom printed t-shirt'
+);
+```
 
 ---
 
