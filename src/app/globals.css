@@ -203,47 +203,25 @@ p {
 }
 
 /* ===========================
-   Utility Classes
+   Utility Classes (Clean & Bold UI)
    =========================== */
 
-/* Gradient Text - Aceternity style */
+/* Text Emphasis */
 .text-gradient {
-  background: linear-gradient(135deg, var(--primary-600) 0%, var(--accent-500) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--primary-600);
 }
 
 .text-gradient-purple {
-  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--primary-600);
 }
 
-/* Glass Effect - Modern glassmorphism */
-.glass-effect {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
-}
-
-.glass-panel {
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
-}
-
-/* Card Effects */
+/* Base Card Styles - Clean & Solid */
 .card {
   background: var(--surface);
   border-radius: var(--radius-xl);
-  border: 1px solid var(--border);
-  transition: all var(--transition-base);
+  border: 1px solid var(--gray-100);
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
 }
 
 .card-hover {
@@ -252,9 +230,9 @@ p {
 }
 
 .card-hover:hover {
-  transform: translateY(-4px) scale(1.01);
-  box-shadow: 0 20px 40px -10px rgba(0,0,0,0.08), 0 0 0 1px rgba(255,107,107,0.1);
-  border-color: var(--primary-200);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+  border-color: var(--gray-200);
 }
 
 /* Spotlight Effect - Aceternity style */
@@ -496,7 +474,7 @@ p {
 }
 
 /* ===========================
-   Buttons - Stripe Style
+   Buttons - Clean, High Contrast B2C SaaS Style
    =========================== */
 
 .btn {
@@ -504,106 +482,85 @@ p {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.625rem 1.25rem;
-  font-size: 0.9375rem;
-  font-weight: var(--font-medium);
+  padding: 0.75rem 1.25rem;
+  font-size: 1rem;
+  font-weight: var(--font-bold);
   line-height: 1.5;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg); /* Slightly more rounded */
   border: none;
   cursor: pointer;
-  transition: all var(--transition-base);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: var(--font-sans);
   white-space: nowrap;
   user-select: none;
 }
 
 .btn:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
   pointer-events: none;
 }
 
-/* Primary Button - Premium Gradient */
+/* Primary Button - Solid, Highly Visible Warm Coral */
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-500) 100%);
-  color: white;
-  box-shadow: 0 4px 14px 0 rgba(255, 107, 107, 0.39);
-  border: 1px solid transparent;
-  position: relative;
-  overflow: hidden;
-}
-
-.btn-primary::after {
-  content: '';
-  position: absolute;
-  top: 0; left: -100%;
-  width: 50%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-  transition: all 0.5s ease;
-}
-
-.btn-primary:hover:not(:disabled)::after {
-  left: 100%;
+  background-color: var(--primary-600);
+  color: #fff;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-400) 100%);
-  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
-  transform: translateY(-2px);
+  background-color: var(--primary-700);
 }
 
 .btn-primary:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(255, 107, 107, 0.2);
+  background-color: var(--primary-800);
+  transform: scale(0.98);
 }
 
-/* Secondary Button */
+/* Secondary Button - Outline / Light Gray Solid */
 .btn-secondary {
-  background: var(--surface);
-  color: var(--foreground);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-xs);
+  background-color: var(--gray-50);
+  color: var(--gray-800);
+  border: 1px solid var(--gray-200);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: var(--gray-50);
-  border-color: var(--border-strong);
-  box-shadow: var(--shadow-sm);
+  background-color: var(--gray-100);
+  border-color: var(--gray-300);
 }
 
 .btn-secondary:active:not(:disabled) {
-  background: var(--gray-100);
+  background-color: var(--gray-200);
+  transform: scale(0.98);
 }
 
-/* Success Button - Teal */
+/* Success Button - Solid Mint Green / Teal */
 .btn-success {
-  background: var(--success);
+  background-color: var(--accent-600);
   color: white;
-  box-shadow: var(--shadow-sm);
 }
 
 .btn-success:hover:not(:disabled) {
-  background: #00b894;
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-1px);
+  background-color: var(--accent-700);
 }
 
 /* Icon Button */
 .btn-icon {
   padding: 0.5rem;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
 }
 
 /* Button Sizes */
 .btn-sm {
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
+  border-radius: var(--radius-md);
 }
 
 .btn-lg {
-  padding: 0.875rem 1.75rem;
-  font-size: 1rem;
+  padding: 1rem 2rem;
+  font-size: 1.125rem;
 }
 
 /* ===========================
