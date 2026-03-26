@@ -178,7 +178,7 @@ export default function RefundPage() {
 
           <div className="p-4 bg-yellow-50 border-l-4 border-yellow-500">
             <p className="text-sm text-gray-700">
-              <strong>참고:</strong> GOODZZ(굿쯔)은 통신판매업자로서
+              <strong>참고:</strong> GOODZZ은 통신판매업자로서
               모든 주문에 대한 환불 책임을 부담합니다.
               파트너사는 판매 채널 역할만 수행하며,
               환불 문의는 GOODZZ 고객센터로 연락 주시기 바랍니다.

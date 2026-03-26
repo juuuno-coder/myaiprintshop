@@ -36,7 +36,7 @@ export default function EmbedLayout({
         <footer className="fixed bottom-0 left-0 right-0 bg-gray-50 border-t border-gray-200 px-4 py-3 text-xs text-gray-600 z-50">
           <div className="max-w-2xl mx-auto">
             <div className="font-medium mb-1">
-              통신판매업자: GOODZZ(굿쯔) | 대표: 홍길동 | 사업자등록번호: 123-45-67890
+              통신판매업자: GOODZZ | 대표: 홍길동 | 사업자등록번호: 123-45-67890
             </div>
             <div className="flex flex-wrap gap-3 text-gray-500">
               <a href="/terms" target="_blank" className="hover:underline">이용약관</a>

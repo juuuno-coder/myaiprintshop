@@ -171,7 +171,7 @@ export default function TermsPage() {
         <section className="mb-8 p-6 bg-gray-50 rounded-lg">
           <h2 className="text-2xl font-semibold mb-4">사업자 정보</h2>
           <div className="text-gray-700 space-y-2">
-            <p><strong>상호:</strong> GOODZZ(굿쯔)</p>
+            <p><strong>상호:</strong> GOODZZ</p>
             <p><strong>대표자:</strong> 홍길동</p>
             <p><strong>사업자등록번호:</strong> 123-45-67890</p>
             <p><strong>통신판매업신고:</strong> 제2024-서울강남-0001호</p>
