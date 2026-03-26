@@ -76,27 +76,25 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
       <Navbar />
       <div className="min-h-screen bg-white pt-16">
         {/* Header / Banner */}
-      <div className="bg-gradient-to-br from-primary-900 via-primary-800 to-accent-900 py-24 border-b border-white/10 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-5 mix-blend-overlay"></div>
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-primary-500 opacity-30 rounded-full mix-blend-screen blur-[100px] animate-float" />
-        <div className="container mx-auto px-4 text-center relative z-10 animate-fadeInUp">
+      <div className="bg-gray-50 py-24 border-b border-gray-100">
+        <div className="container mx-auto px-4 text-center">
           {query ? (
               <div>
-                <span className="text-accent-300 font-bold mb-3 block uppercase tracking-widest text-sm flex items-center justify-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-accent-400" />
+                <span className="text-gray-500 font-bold mb-3 block uppercase tracking-widest text-sm flex items-center justify-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-gray-400" />
                   Search Results
-                  <div className="w-1.5 h-1.5 rounded-full bg-accent-400" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-gray-400" />
                 </span>
-                <h1 className="text-4xl md:text-6xl font-extrabold text-white inline-block drop-shadow-lg">
+                <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 inline-block">
                     "{query}"
                 </h1>
               </div>
           ) : (
               <>
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-6 drop-shadow-md tracking-tight">
-                    브랜드 굿즈 직접 만들기
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 mb-6 tracking-tight">
+                    모든 카테고리
                 </h1>
-                <p className="text-primary-100 max-w-2xl mx-auto text-lg md:text-xl font-medium leading-relaxed">
+                <p className="text-gray-600 max-w-2xl mx-auto text-lg md:text-xl font-medium leading-relaxed">
                     사장님을 위한 맞춤형 브랜드 굿즈. <br className="hidden md:block" />
                     수량은 가볍게, 퀄리티는 완벽하게 제작해드립니다.
                 </p>
@@ -116,8 +114,8 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                   href="/shop"
                   className={`px-6 py-2.5 rounded-full whitespace-nowrap text-sm font-bold transition-all ${
                     !category
-                      ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30'
-                      : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-primary-300 hover:bg-primary-50 hover:text-primary-600'
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                   }`}
                 >
                   전체
@@ -130,8 +128,8 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                         href={`/shop?category=${cat.slug}`}
                         className={`px-6 py-2.5 rounded-full whitespace-nowrap text-sm font-bold transition-all ${
                             isActive
-                            ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30'
-                            : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-primary-300 hover:bg-primary-50 hover:text-primary-600'
+                            ? 'bg-primary-600 text-white'
+                            : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                         }`}
                       >
                         {cat.label}

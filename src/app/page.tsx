@@ -62,33 +62,28 @@ export default async function Home() {
       <Hero />
 
       {/* 카테고리 섹션 */}
-      <section className="py-24 bg-gray-50">
+      <section className="py-24 bg-gray-50 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 animate-fadeInUp">
-            <h2 className="text-3xl lg:text-4xl font-extrabold text-gray-900 mb-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl lg:text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">
               가장 많이 찾는 굿즈
             </h2>
-            <p className="text-gray-500 text-lg">사장님들이 가장 선호하는 베스트셀러 카테고리입니다.</p>
+            <p className="text-gray-500 text-lg font-medium">사장님들이 가장 선호하는 베스트셀러입니다.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {categories.map((cat, idx) => (
               <Link
                 key={cat.name}
                 href={cat.href}
-                className="card card-hover overflow-hidden group flex flex-col animate-fadeInUp"
-                style={{ animationDelay: `${idx * 0.15}s` }}
+                className="group flex flex-col items-center"
               >
-                <div className="h-64 bg-gray-100 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10 transition-opacity group-hover:opacity-70" />
-                  <div className="absolute inset-0 flex items-center justify-center bg-gray-200 group-hover:scale-105 transition-transform duration-500">
-                    {/* Placeholder for mockup image */}
-                    <span className="text-gray-400 font-medium">실물 목업 이미지 ({cat.name})</span>
-                  </div>
-                  <div className="absolute bottom-4 left-4 right-4 z-20">
-                    <h3 className="font-bold text-2xl text-white mb-1 drop-shadow-md">{cat.name}</h3>
-                    <p className="text-white/90 text-sm font-medium">{cat.desc}</p>
+                <div className="w-full aspect-[4/3] bg-white rounded-2xl border border-gray-200 shadow-sm relative overflow-hidden mb-6 group-hover:shadow-md group-hover:border-primary-200 transition-all duration-300">
+                  <div className="absolute inset-0 flex items-center justify-center bg-gray-50 group-hover:bg-primary-50/30 transition-colors">
+                    <span className="text-gray-400 font-bold text-lg">목업 이미지 ({cat.name})</span>
                   </div>
                 </div>
+                <h3 className="font-extrabold text-2xl text-gray-900 mb-2 group-hover:text-primary-600 transition-colors">{cat.name}</h3>
+                <p className="text-gray-500 text-base font-medium">{cat.desc}</p>
               </Link>
             ))}
           </div>
@@ -96,28 +91,26 @@ export default async function Home() {
       </section>
 
       {/* 사용 흐름 섹션 */}
-      <section className="py-24 bg-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-primary-50/50 skew-x-12 translate-x-1/4 -z-10 blur-3xl" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center animate-fadeInUp">
-          <h2 className="text-3xl lg:text-4xl font-extrabold text-gray-900 mb-16">
-            굿쯔 제작, 단 4단계면 충분해요
+      <section className="py-24 bg-white border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl lg:text-4xl font-extrabold text-gray-900 mb-16 tracking-tight">
+            단 4단계면 주문 완료
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {[
-              { num: 1, title: '카테고리 선택', icon: LayoutGrid },
-              { num: 2, title: 'AI가 디자인', icon: Palette },
-              { num: 3, title: '수량 선택 & 결제', icon: CheckCircle },
-              { num: 4, title: '배송 완료', icon: Package },
+              { num: 1, title: '상품 선택', icon: LayoutGrid },
+              { num: 2, title: 'AI 디자인', icon: Palette },
+              { num: 3, title: '옵션/결제', icon: CheckCircle },
+              { num: 4, title: '총알 배송', icon: Package },
             ].map((step, idx) => (
-              <div key={idx} className="relative animate-fadeInUp" style={{ animationDelay: `${idx * 0.1}s` }}>
+              <div key={idx} className="relative">
                 {idx < 3 && (
-                  <div className="hidden md:block absolute top-10 left-[60%] w-[80%] h-[2px] bg-gradient-to-r from-primary-200 to-transparent" />
+                  <div className="hidden md:block absolute top-10 left-[60%] w-[80%] h-[2px] bg-gray-100" />
                 )}
-                <div className="w-20 h-20 bg-white shadow-lg rounded-2xl flex items-center justify-center mx-auto mb-6 relative z-10 border border-gray-100 group hover:shadow-xl transition-all hover:-translate-y-1">
-                  <div className="absolute inset-0 bg-primary-50 rounded-2xl scale-0 group-hover:scale-100 transition-transform duration-300 origin-center" />
-                  <step.icon className="w-8 h-8 text-primary-600 relative z-10" />
+                <div className="w-20 h-20 bg-primary-50 text-primary-600 rounded-full flex items-center justify-center mx-auto mb-6 relative z-10 border border-primary-100">
+                  <step.icon className="w-8 h-8" />
                 </div>
-                <h3 className="font-bold text-gray-900 mb-2 text-lg">{step.num}. {step.title}</h3>
+                <h3 className="font-extrabold text-gray-900 mb-2 text-xl">{step.num}. {step.title}</h3>
               </div>
             ))}
           </div>
@@ -125,25 +118,24 @@ export default async function Home() {
       </section>
 
       {/* 왜 굿쯔? 섹션 */}
-      <section className="py-24 bg-primary-900 text-white relative">
-        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-5 mix-blend-overlay"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fadeInUp">
-          <h2 className="text-3xl lg:text-4xl font-extrabold mb-16 text-center text-white">
-            사장님들이 굿쯔를 <span className="text-primary-400">선택하는 이유</span>
+      <section className="py-24 bg-gray-50 border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl lg:text-4xl font-extrabold mb-16 text-center text-gray-900 tracking-tight">
+            사장님들이 굿쯔를 <span className="text-primary-600">선택하는 이유</span>
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
-              { icon: Palette, title: '디자이너 없이', desc: 'AI가 브랜드에 맞는\n디자인을 제안합니다' },
-              { icon: Box, title: '소량 주문 OK', desc: '100장부터 가능,\n부담 없는 가격' },
-              { icon: Clock, title: '빠른 배송', desc: '주문 후\n2~3일 내 도착' },
-              { icon: LayoutGrid, title: '브랜드 일관성', desc: '로고/컬러 등록 시\n모든 굿즈에 자동 적용' },
+              { icon: Palette, title: '디자인 무료', desc: '비싼 외주 없이 AI가\n브랜드 맞춤 디자인 완성' },
+              { icon: Box, title: '진짜 소량 주문', desc: '쌓아둘 필요 없이\n딱 100장부터 주문 가능' },
+              { icon: Clock, title: '초고속 제작', desc: '주문 당일 인쇄 시작,\n빠르면 내일 도착' },
+              { icon: LayoutGrid, title: '브랜드 통일', desc: '우리 가게 로고 한 번 치면\n모든 굿즈에 자동 최적화' },
             ].map(({ icon: Icon, title, desc }, idx) => (
-              <div key={title} className="glass-panel text-center p-8 rounded-3xl border-white/10 hover:bg-white/10 transition-colors animate-fadeInUp" style={{ animationDelay: `${idx * 0.1}s` }}>
-                <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-6 backdrop-blur-md">
-                  <Icon className="w-7 h-7 text-primary-300" />
+              <div key={title} className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm text-center transform transition-transform hover:-translate-y-1 hover:shadow-md">
+                <div className="w-16 h-16 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Icon className="w-8 h-8 text-primary-600" />
                 </div>
-                <h3 className="font-bold text-lg text-white mb-3">{title}</h3>
-                <p className="text-sm text-gray-300 leading-relaxed">
+                <h3 className="font-extrabold text-xl text-gray-900 mb-3">{title}</h3>
+                <p className="text-base text-gray-500 font-medium leading-relaxed">
                   {desc.split('\n').map((line, i) => (
                     <span key={i}>{line}{i === 0 && <br />}</span>
                   ))}

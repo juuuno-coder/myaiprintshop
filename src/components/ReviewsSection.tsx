@@ -109,7 +109,7 @@ export default function ReviewsSection() {
   const currentReview = reviews[currentIndex];
 
   return (
-    <section className="py-20 bg-gradient-to-b from-white to-gray-50">
+    <section className="py-24 bg-white border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* 섹션 헤더 */}
         <div className="text-center mb-12">
@@ -126,8 +126,8 @@ export default function ReviewsSection() {
         </div>
 
         {/* Star Distribution Chart */}
-        <div className="max-w-4xl mx-auto mb-12 animate-fadeInUp">
-          <div className="glass-panel bg-white/80 rounded-3xl shadow-lg p-8 md:p-10 border border-white/50">
+        <div className="max-w-4xl mx-auto mb-16">
+          <div className="bg-white rounded-3xl border border-gray-200 shadow-sm p-8 md:p-10">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
               {/* Average Rating */}
               <div className="flex flex-col items-center justify-center text-center">
@@ -190,15 +190,15 @@ export default function ReviewsSection() {
         </div>
 
         {/* 리뷰 슬라이더 */}
-        <div className="relative max-w-4xl mx-auto animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
+        <div className="relative max-w-4xl mx-auto">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentIndex}
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -10 }}
-              transition={{ duration: 0.5, type: 'spring', stiffness: 100 }}
-              className="glass-panel bg-white/90 rounded-3xl shadow-xl p-8 md:p-12 border border-white/40"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.4 }}
+              className="bg-white rounded-3xl border border-gray-200 shadow-sm p-8 md:p-12 mb-8"
             >
               <div className="grid md:grid-cols-2 gap-8 items-center">
                 {/* 왼쪽: 리뷰 이미지 */}

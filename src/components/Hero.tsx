@@ -1,87 +1,95 @@
-'use client';
-
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 
 export default function Hero() {
   return (
-    <section className="relative bg-background overflow-hidden">
-      {/* Background Aurora / Glow */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary-300 opacity-20 rounded-full mix-blend-multiply blur-3xl animate-float" />
-        <div className="absolute top-1/4 right-1/4 w-[30rem] h-[30rem] bg-accent-300 opacity-20 rounded-full mix-blend-multiply blur-3xl animate-float" style={{ animationDelay: '2s' }} />
-        <div className="absolute -bottom-32 left-1/2 -translate-x-1/2 w-[40rem] h-[40rem] bg-yellow-200 opacity-20 rounded-full mix-blend-multiply blur-3xl animate-float" style={{ animationDelay: '4s' }} />
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 relative z-10">
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, type: 'spring', stiffness: 100 }}
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-100 text-primary-700 rounded-full text-sm font-bold mb-8 shadow-sm">
-              <Sparkles className="w-4 h-4" />
-              미친 퀄리티의 AI 디자인
+    <section className="bg-white overflow-hidden py-24 md:py-32 border-b border-gray-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          {/* Text Content */}
+          <div className="max-w-xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-gray-50 text-gray-700 rounded border border-gray-200 text-sm font-bold mb-6">
+              <ShoppingBag className="w-4 h-4 text-primary-600" />
+              대한민국 1등 소상공인 AI 굿즈
             </div>
             
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-gray-900 mb-8 leading-[1.15] tracking-tight">
-              사장님, 브랜드 굿즈{' '}
-              <br className="hidden sm:block" />
-              <span className="text-gradient">직접 만들어보세요</span>
+            <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-6 leading-[1.15] tracking-tight">
+              내 가게 브랜드 굿즈,<br />
+              <span className="text-primary-600">AI로 뚝딱</span> 만드세요
             </h1>
 
-            <p className="text-lg md:text-xl text-gray-500 mb-10 leading-relaxed max-w-2xl mx-auto">
-              AI가 디자인하고, 굿쯔가 만들어드립니다.
-              <br />
-              소량도 OK! 부담 없이 브랜드 맞춤 제작을 시작하세요.
+            <p className="text-lg md:text-xl text-gray-600 mb-10 leading-relaxed font-medium">
+              명함, 스티커, 전단지까지 — 더 이상 디자인 스트레스 받지 마세요.<br />
+              AI 디자이너가 퀄리티 있게 뽑아주고, 굿쯔가 제작해 드립니다.
             </p>
-          </motion.div>
 
-          {/* CTA 버튼 */}
-          <motion.div 
-            className="flex flex-col sm:flex-row justify-center items-center gap-4"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            <Link
-              href="/create"
-              className="btn btn-primary btn-lg group w-full sm:w-auto px-8 py-4 text-lg"
-            >
-              무료로 시작하기
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-4 mb-10">
+              <Link
+                href="/create"
+                className="btn btn-primary btn-lg flex-1 sm:flex-none justify-center px-8"
+              >
+                무료로 시작하기
+                <ArrowRight className="w-5 h-5 ml-1" />
+              </Link>
 
-            <Link
-              href="/shop"
-              className="btn btn-secondary btn-lg glass-panel hover:bg-white w-full sm:w-auto px-8 py-4 text-lg"
-            >
-              둘러보기
-            </Link>
-          </motion.div>
+              <Link
+                href="/shop"
+                className="btn btn-secondary btn-lg flex-1 sm:flex-none justify-center px-8"
+              >
+                상품 둘러보기
+              </Link>
+            </div>
 
-          {/* 신뢰 배지 */}
-          <motion.div 
-            className="mt-16 flex flex-wrap justify-center items-center gap-6 md:gap-10 text-sm text-gray-500 font-medium"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 0.6 }}
-          >
-            <div className="flex items-center gap-2 glass-panel px-4 py-2 rounded-full">
-              <div className="w-2 h-2 rounded-full bg-accent-500 animate-pulse"></div>
-              <span>24시간 빠른 제작</span>
+            {/* 신뢰 포인트 */}
+            <div className="flex items-center gap-6 text-sm font-bold text-gray-500">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-accent-600"></span>
+                <span>24시간 내 초고속 샘플</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-accent-600"></span>
+                <span>소량 인쇄 100장부터</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2 glass-panel px-4 py-2 rounded-full">
-              <div className="w-2 h-2 rounded-full bg-accent-500 animate-pulse"></div>
-              <span>무료 배송</span>
-            </div>
-            <div className="flex items-center gap-2 glass-panel px-4 py-2 rounded-full">
-              <div className="w-2 h-2 rounded-full bg-accent-500 animate-pulse"></div>
-              <span>100% 만족 보장</span>
-            </div>
-          </motion.div>
+          </div>
+
+          {/* Visual Content (Mockup Graphics) */}
+          <div className="relative w-full aspect-square lg:aspect-auto lg:h-[600px] bg-gray-50 rounded-3xl border border-gray-100 overflow-hidden flex items-center justify-center p-8">
+             <div className="absolute inset-0 bg-gradient-to-br from-primary-50/50 to-white"></div>
+             
+             {/* Main Graphic - Business Card Mockup */}
+             <div className="relative z-10 w-64 md:w-80 aspect-[1.5/1] bg-white rounded-xl shadow-lg border border-gray-100 p-6 flex flex-col justify-between transform -rotate-6 hover:rotate-0 transition-transform duration-500 ease-in-out">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 bg-primary-100 rounded-full flex-shrink-0"></div>
+                  <div className="space-y-2 w-full">
+                    <div className="h-4 bg-gray-200 rounded-md w-3/4"></div>
+                    <div className="h-3 bg-gray-100 rounded-md w-1/2"></div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                   <div className="h-3 bg-gray-100 rounded-md w-full"></div>
+                   <div className="h-3 bg-gray-100 rounded-md w-4/5"></div>
+                </div>
+             </div>
+             
+             {/* Floating element 1 - Sticker Roll */}
+             <div className="absolute top-10 right-10 w-24 h-24 bg-white rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.1)] border-4 border-gray-50 p-2 transform rotate-12 flex items-center justify-center">
+                <div className="w-full h-full bg-accent-100 rounded-full flex items-center justify-center border-2 border-accent-200">
+                  <span className="text-accent-600 font-bold text-xs">스티커</span>
+                </div>
+             </div>
+             
+             {/* Floating element 2 - UI Card */}
+             <div className="absolute bottom-16 -left-8 md:left-4 w-48 bg-white rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-gray-50 p-4 transform rotate-3">
+                <div className="flex justify-between items-center mb-3">
+                  <span className="text-xs font-bold text-gray-500">AI 완성본</span>
+                  <div className="w-2 h-2 rounded-full bg-primary-500"></div>
+                </div>
+                <div className="h-8 bg-gray-100 rounded-lg w-full flex items-center px-3">
+                   <div className="h-2 bg-gray-300 rounded-full w-1/2"></div>
+                </div>
+             </div>
+          </div>
         </div>
       </div>
     </section>
