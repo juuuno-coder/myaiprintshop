@@ -14,6 +14,7 @@
 import { getWowPressClient } from './api-client';
 import { mapOrderToWowPressSpec, validateWowPressSpec, formatSpecPreview } from './spec-mapper';
 import { db } from '@/lib/firebase';
+import { updateOrder } from '@/lib/orders';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
 
 /**
@@ -89,13 +90,13 @@ export async function forwardOrderToWowPress(order: any): Promise<void> {
         updatedAt: Timestamp.now(),
       });
 
-      // 8. TODO: vendorOrder에 externalOrderId 업데이트
-      // await updateDoc(doc(db, 'orders', order.id), {
-      //   [`vendorOrders.${index}.externalOrderId`]: result.orderno,
-      //   [`vendorOrders.${index}.externalStatus`]: 'pending',
-      // });
+      // 8. vendorOrder에 externalOrderId 및 상태 업데이트
+      await updateOrder(order.id, {
+        [`vendorOrders.${wowpressOrders.findIndex((vo: any) => vo.vendorId === vendorOrder.vendorId)}.externalOrderId`]: result.orderno,
+        [`vendorOrders.${wowpressOrders.findIndex((vo: any) => vo.vendorId === vendorOrder.vendorId)}.status`]: 'confirmed',
+      } as any);
 
-      console.log(`💾 로그 저장 완료`);
+      console.log(`💾 주문 상태 업데이트 완료: ${result.orderno}`);
 
     } catch (error) {
       console.error(`\n❌ 주문 전달 실패:`, error);

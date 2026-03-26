@@ -84,6 +84,9 @@ export interface WowPressProductSpec {
     zipcode: string;             // 우편번호
     memo: string;                // 배송 메모
   };
+  
+  // 10. (GOODZZ 확장) 인쇄 파일 정보
+  printfile?: string;            // 고해상도 인쇄용 디자인 파일 URL
 }
 
 /**
@@ -168,6 +171,9 @@ export function mapOrderToWowPressSpec(
       zipcode: order.shippingInfo?.postalCode || '',
       memo: order.shippingInfo?.memo || '',
     },
+    
+    // 10. 인쇄 파일 (에디터에서 생성된 고해상도 PNG)
+    printfile: selectedOptions.customDesign || orderItem?.thumbnail || '',
   };
 }
 
