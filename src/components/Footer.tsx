@@ -13,7 +13,7 @@ export default function Footer() {
           {/* Brand & Contact */}
           <div className="lg:col-span-2">
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-xl font-black tracking-tighter text-white">GOODZZ(굿쯔)</span>
+              <span className="text-xl font-black tracking-tighter text-white">GOODZZ</span>
             </div>
             <p className="text-gray-400 mb-6 max-w-md leading-relaxed">
               소상공인과 브랜드를 위한 AI 굿즈 제작 플랫폼. 
@@ -93,7 +93,7 @@ export default function Footer() {
               <p>주소: 부산광역시 수영구 수영로 47 2층</p>
             </div>
             <p className="text-gray-600">
-              © 2026 GOODZZ(굿쯔). All rights reserved.
+              © 2026 GOODZZ. All rights reserved.
             </p>
           </div>
         </div>

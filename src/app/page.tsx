@@ -117,11 +117,11 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* 왜 굿쯔? 섹션 */}
+      {/* 왜 GOODZZ? 섹션 */}
       <section className="py-24 bg-gray-50 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl lg:text-4xl font-extrabold mb-16 text-center text-gray-900 tracking-tight">
-            사장님들이 굿쯔를 <span className="text-primary-600">선택하는 이유</span>
+            사장님들이 GOODZZ를 <span className="text-primary-600">선택하는 이유</span>
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[

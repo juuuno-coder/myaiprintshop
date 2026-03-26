@@ -121,7 +121,7 @@ export default function ReviewsSection() {
             1,000+ 사장님이 선택했습니다
           </h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            실제 굿쯔를 이용하신 사장님들의 생생한 후기를 확인해보세요
+            실제 GOODZZ를 이용하신 사장님들의 생생한 후기를 확인해보세요
           </p>
         </div>
 

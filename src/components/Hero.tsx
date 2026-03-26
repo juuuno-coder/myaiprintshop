@@ -20,7 +20,7 @@ export default function Hero() {
 
             <p className="text-lg md:text-xl text-gray-600 mb-10 leading-relaxed font-medium">
               명함, 스티커, 전단지까지 — 더 이상 디자인 스트레스 받지 마세요.<br />
-              AI 디자이너가 퀄리티 있게 뽑아주고, 굿쯔가 제작해 드립니다.
+              AI 디자이너가 퀄리티 있게 뽑아주고, GOODZZ가 제작해 드립니다.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 mb-10">
