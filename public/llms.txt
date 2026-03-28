@@ -1,0 +1,15 @@
+# GOODZZ (굿쯔)
+> 사진 한 장으로 시작되는 프리미엄 글로벌 굿즈. AI 자동 시안 합성 기술로 완성되는 나만의 브랜드 굿즈 제작 플랫폼
+
+## 주요 기능
+- AI 자동 시안 합성 (사진 업로드 → 굿즈 시안)
+- 다양한 굿즈 종류 (스티커, 포스터, 머그컵 등)
+- 글로벌 배송 지원
+- 소량 주문 가능 (100장~)
+
+## 기술 스택
+- Next.js, Firebase, Gemini AI, Fabric.js, PortOne, Tailwind CSS
+
+## 관련 링크
+- 서비스: https://goodzz.co.kr
+- 계발자들: https://vibers.co.kr
