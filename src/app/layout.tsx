@@ -49,6 +49,26 @@ export default function RootLayout({
         <script src="https://code.iconify.design/iconify-icon/2.3.0/iconify-icon.min.js" async></script>
       </head>
       <body className="antialiased bg-zinc-950 text-zinc-200 selection:bg-amber-500/30 selection:text-amber-200">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              "name": "GOODZZ",
+              "url": "https://goodzz.co.kr",
+              "description": "사진 한 장으로 시작되는 프리미엄 글로벌 굿즈. AI 자동 시안 합성 기술로 완성되는 나만의 브랜드 굿즈 제작 플랫폼",
+              "applicationCategory": "DesignApplication",
+              "operatingSystem": "Web",
+              "creator": {
+                "@type": "Organization",
+                "name": "계발자들 (Vibers)",
+                "url": "https://vibers.co.kr"
+              },
+              "inLanguage": "ko"
+            })
+          }}
+        />
         <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7704550771011130"
