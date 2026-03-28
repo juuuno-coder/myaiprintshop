@@ -18,6 +18,8 @@
     "migrate:vendors": "tsx scripts/migrate-vendors.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.714.0",
+    "@aws-sdk/s3-request-presigner": "^3.714.0",
     "@google/generative-ai": "^0.24.1",
     "@opentelemetry/api": "^1.9.0",
     "@portone/browser-sdk": "^0.1.2",

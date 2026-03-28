@@ -65,8 +65,20 @@ export async function getReviewsByProduct(productId: string): Promise<Review[]> 
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => docToReview(doc.data(), doc.id));
   } catch (error) {
-    console.error('Error fetching reviews:', error);
-    return [];
+    console.warn('Falling back to memory sort for product reviews:', error);
+    try {
+      // 인덱스 없을 경우 폴백: 우선 필터링만 하고 메모리에서 정렬
+      const q = query(
+        reviewsCollection,
+        where('productId', '==', productId)
+      );
+      const snapshot = await getDocs(q);
+      const reviews = snapshot.docs.map(doc => docToReview(doc.data(), doc.id));
+      return reviews.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    } catch (fallbackError) {
+      console.error('Error fetching reviews:', fallbackError);
+      return [];
+    }
   }
 }
 

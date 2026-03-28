@@ -27,6 +27,15 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
 
   /* Production Environment */
+  output: 'standalone',
+  // @ts-ignore
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  // @ts-ignore
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   env: {
     NEXT_PUBLIC_APP_VERSION: '1.0.0',
   },

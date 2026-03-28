@@ -43,14 +43,11 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet" />
-        <link
-          rel="stylesheet"
-          type="text/css"
-          href="https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/NanumSquareRound.woff"
-        />
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css" />
+        <script src="https://code.iconify.design/iconify-icon/2.3.0/iconify-icon.min.js" async></script>
       </head>
-      <body className="antialiased selection:bg-primary-100 selection:text-primary-900">
+      <body className="antialiased bg-zinc-950 text-zinc-200 selection:bg-amber-500/30 selection:text-amber-200">
         <AuthProvider>
           <CartSync />
           {children}

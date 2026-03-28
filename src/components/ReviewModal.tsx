@@ -4,8 +4,7 @@ import React, { useState, useRef } from 'react';
 import { Star, X, Camera, Loader2, CheckCircle2, Trash2, ImagePlus } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '@/lib/firebase';
+import { uploadFile } from '@/lib/storage-service';
 
 interface ReviewModalProps {
   isOpen: boolean;
@@ -93,11 +92,16 @@ export default function ReviewModal({
     for (const file of selectedFiles) {
       const timestamp = Date.now();
       const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
-      const storageRef = ref(storage, `reviews/${productId}/${userId}_${timestamp}_${safeName}`);
+      const path = `reviews/${productId}/${userId}_${timestamp}_${safeName}`;
 
-      const snapshot = await uploadBytes(storageRef, file);
-      const downloadUrl = await getDownloadURL(snapshot.ref);
-      uploadedUrls.push(downloadUrl);
+      const downloadUrl = await uploadFile(file, { 
+        path,
+        contentType: file.type
+      });
+      
+      if (downloadUrl) {
+        uploadedUrls.push(downloadUrl);
+      }
     }
 
     return uploadedUrls;

@@ -4,8 +4,9 @@ import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, Wand2, ShoppingBag, ArrowRight, Palette, Layers, Zap } from 'lucide-react';
 import Link from 'next/link';
-import { X, Globe, CreditCard } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
+import OrderModal from './common/OrderModal';
+import { useRouter } from 'next/navigation';
 
 interface Product {
   id: string;
@@ -62,186 +63,212 @@ export default function CreateClientContent({ products }: { products: Product[] 
 
   return (
     <>
-      {/* Hero Section */}
-      <section className="pt-32 pb-24 bg-gray-50 border-b border-gray-100">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white text-gray-700 rounded border border-gray-200 text-sm font-bold mb-6">
-              <Sparkles className="w-4 h-4 text-primary-600" />
-              사진 1장 = 모든 굿즈
-            </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 mb-6 tracking-tight">
-              내 사진을 그대로{' '}
-              <span className="text-primary-600">
-                글로벌 굿즈
-              </span>로
-            </h1>
-            <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-10 font-medium leading-relaxed">
-              복잡한 디자인 툴은 잊으세요. 원하는 사진만 올리면<br className="hidden sm:block" />
-              어떤 상품이든 찰떡같이 입혀서 전 세계로 배송해 드립니다.
-            </p>
-            <div className="flex justify-center flex-col sm:flex-row gap-4 mb-4">
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                onChange={handleImageUpload} 
-                className="hidden" 
-                accept="image/jpeg, image/png, image/webp"
+      {/* Premium Hero Section */}
+      <section className="relative pt-32 pb-24 lg:pt-48 lg:pb-32 overflow-hidden bg-white">
+        {/* Abstract Background Accents */}
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-primary-50/50 to-transparent -z-10" />
+        <div className="absolute bottom-0 left-0 w-1/2 h-64 bg-gradient-to-t from-accent-50/50 to-transparent -z-10" />
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 text-primary-600 rounded-full text-sm font-bold mb-8">
+                <Sparkles className="w-4 h-4" />
+                사진 1장으로 만드는 프리미엄 브랜드
+              </div>
+              <h1 className="text-5xl md:text-7xl font-display font-black text-gray-900 leading-[1.1] mb-8 tracking-tighter">
+                내 사진이 그대로<br />
+                <span className="gradient-text">글로벌 굿즈</span>로
+              </h1>
+              <p className="text-xl text-gray-500 max-w-xl mb-12 font-medium leading-relaxed">
+                복잡한 디자인 툴은 잊으세요. 원하는 사진만 올리면<br className="hidden sm:block" />
+                현지의 전문 생산 기지에서 프리미엄 굿즈로 재탄생합니다.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-4">
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  onChange={handleImageUpload} 
+                  className="hidden" 
+                  accept="image/jpeg, image/png, image/webp"
+                />
+                <button 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-8 py-5 bg-gray-900 text-white rounded-[20px] font-bold text-lg flex items-center justify-center gap-3 hover:bg-gray-800 transition-all shadow-xl hover:shadow-gray-200 active:scale-95"
+                >
+                  <Palette className="w-6 h-6" />
+                  {uploadedImage ? '다른 사진으로 변경' : '사진 업로드하여 시작'}
+                </button>
+                <button 
+                  onClick={() => {
+                    // Simulate sample upload
+                    setIsGenerating(true);
+                    setTimeout(() => {
+                      setUploadedImage('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&q=80&w=1000');
+                      setIsGenerating(false);
+                    }, 1000);
+                  }}
+                  className="px-8 py-5 bg-white border-2 border-gray-100 text-gray-900 rounded-[20px] font-bold text-lg hover:border-primary-200 transition-all active:scale-95 flex items-center justify-center gap-2"
+                >
+                  <Wand2 className="w-5 h-5 text-primary-500" />
+                  샘플로 미리보기
+                </button>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, rotate: 2 }}
+              animate={{ opacity: 1, scale: 1, rotate: 0 }}
+              transition={{ duration: 1, delay: 0.2 }}
+              className="relative aspect-square"
+            >
+              <div className="absolute inset-0 bg-gradient-to-tr from-primary-100/30 to-accent-100/30 rounded-[40px] blur-3xl -z-10" />
+              <img 
+                src="/Users/juuuno/.gemini/antigravity/brain/1f63340d-df41-41e6-b7d1-5cf93368d28b/premium_goodzz_hero_shot_1774576377465.png"
+                alt="Premium Goods Showcase"
+                className="w-full h-full object-cover rounded-[48px] shadow-2xl border-8 border-white animate-float"
               />
-              <button 
-                onClick={() => fileInputRef.current?.click()}
-                className="btn btn-primary btn-lg flex items-center justify-center gap-2 font-bold px-8"
-              >
-                <Palette className="w-5 h-5" />
-                {uploadedImage ? '다른 사진으로 변경하기' : '사진 갤러리에서 업로드 (JPG, PNG)'}
-              </button>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* How it works */}
-      <section className="py-16 bg-white">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-gray-900 text-center mb-12">
-            3단계로 완성하는 나만의 굿즈
-          </h2>
-          <div className="grid md:grid-cols-3 gap-8">
+      {/* How it works - Premium Mini Cards */}
+      <section className="py-24 bg-gray-50/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-3 gap-12">
             {[
-              { icon: Palette, step: '01', title: '사진 업로드', desc: '굿즈로 만들고 싶은 사진을 한 장 골라주세요', color: 'primary' },
-              { icon: Wand2, step: '02', title: '자동 합성 미리보기', desc: '모든 굿즈에 내 사진이 자동 적용됩니다', color: 'secondary' },
-              { icon: ShoppingBag, step: '03', title: '글로벌 주문 🚀', desc: '전 세계 어디든 빠르고 안전하게 배송해드려요', color: 'accent' },
+              { icon: Palette, title: '디자인 업로드', desc: '사진 한 장이면 충분합니다', color: 'primary' },
+              { icon: Zap, title: '실시간 시안 합성', desc: '모든 상품을 1초 만에 확인하세요', color: 'secondary' },
+              { icon: ShoppingBag, title: '글로벌 주문 제작', desc: '전 세계 어디든 프리미엄 직배송', color: 'accent' },
             ].map((item, i) => (
-              <motion.div
-                key={item.step}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="text-center"
-              >
-                <div className={`w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center ${
-                  item.color === 'primary' ? 'bg-primary-100' :
-                  item.color === 'secondary' ? 'bg-secondary-100' : 'bg-accent-100'
-                }`}>
-                  <item.icon className={`w-7 h-7 ${
-                    item.color === 'primary' ? 'text-primary-600' :
-                    item.color === 'secondary' ? 'text-secondary-600' : 'text-accent-600'
-                  }`} />
+              <div key={item.title} className="flex gap-6 items-start">
+                <div className={`w-14 h-14 shrink-0 rounded-2xl glass flex items-center justify-center shadow-soft`}>
+                  <item.icon className={`w-6 h-6 text-primary-600`} />
                 </div>
-                <div className="text-xs font-bold text-gray-400 mb-2">STEP {item.step}</div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">{item.title}</h3>
-                <p className="text-sm text-gray-500">{item.desc}</p>
-              </motion.div>
+                <div>
+                  <h3 className="text-xl font-display font-bold text-gray-900 mb-2">{item.title}</h3>
+                  <p className="text-gray-500 font-medium">{item.desc}</p>
+                </div>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-
-
-      {/* Draft Showcase Section (Visible after upload) */}
+      {/* Showcase Section (Visible after upload) */}
       <AnimatePresence>
         {uploadedImage && (
-          <section className="py-20 bg-gradient-to-b from-primary-50/30 to-white overflow-hidden">
+          <section className="py-32 bg-white overflow-hidden">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex flex-col md:flex-row items-end justify-between mb-12 gap-6">
-                <div className="max-w-xl">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-xs font-bold mb-4">
-                    <Zap className="w-3 h-3" /> AUTO-MOCKUP ENGINE
-                  </div>
-                  <h2 className="text-3xl md:text-4xl font-black text-gray-900 leading-tight">
+              <header className="max-w-3xl mb-16">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <h2 className="text-4xl md:text-5xl font-display font-black text-gray-900 leading-tight mb-6 tracking-tight">
                     {isGenerating ? '시안을 생성하고 있어요...' : '방금 올린 사진으로 만든\n오늘의 추천 굿즈 시안'}
                   </h2>
-                </div>
-                {!isGenerating && (
-                  <button 
-                    onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-2 text-primary-600 font-bold hover:text-primary-700 transition-colors"
-                  >
-                    <Palette className="w-4 h-4" /> 다른 사진으로 시안 보기
-                  </button>
-                )}
-              </div>
+                  <p className="text-lg text-gray-500 font-medium">
+                    AI가 사진의 특성을 분석하여 최적의 비율로 각 상품에 자동 합성했습니다.
+                  </p>
+                </motion.div>
+              </header>
 
               {isGenerating ? (
-                <div className="flex flex-col items-center justify-center py-20">
-                  <div className="relative w-24 h-24 mb-6">
+                <div className="flex flex-col items-center justify-center py-32">
+                  <div className="relative w-32 h-32 mb-8">
                     <motion.div 
                       animate={{ rotate: 360 }}
                       transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-                      className="absolute inset-0 border-4 border-primary-100 border-t-primary-600 rounded-full"
+                      className="absolute inset-0 border-[6px] border-primary-100 border-t-primary-600 rounded-full"
                     />
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <Sparkles className="w-8 h-8 text-primary-500 animate-pulse" />
+                      <Sparkles className="w-10 h-10 text-primary-500 animate-pulse" />
                     </div>
                   </div>
-                  <p className="text-gray-400 font-medium animate-pulse">이미지 분석 및 시안 합성 중...</p>
+                  <p className="text-xl text-gray-400 font-bold animate-pulse">이미지 분석 및 프리미엄 시안 합성 중...</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                   {[
-                    { name: '오버핏 코튼 티셔츠', category: '의류', theme: 'bg-blue-50', rotate: -1 },
-                    { name: '세라믹 머그컵 (350ml)', category: '주방', theme: 'bg-green-50', rotate: 2 },
-                    { name: '프리미엄 폰케이스', category: '액세서리', theme: 'bg-purple-50', rotate: -2 },
+                    { name: '오버핏 코튼 티셔츠', category: '생활/패션', theme: 'from-blue-50 to-white', rotate: -1 },
+                    { name: '세라믹 머그컵 (350ml)', category: '주방/리빙', theme: 'from-green-50 to-white', rotate: 2 },
+                    { name: '프리미엄 폰케이스', category: '디지털/액세서리', theme: 'from-purple-50 to-white', rotate: -2 },
                   ].map((item, idx) => (
                     <motion.div
                       key={item.name}
-                      initial={{ opacity: 0, y: 30 }}
+                      initial={{ opacity: 0, y: 40 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.1 }}
-                      className={`${item.theme} rounded-[2.5rem] p-10 flex flex-col items-center justify-center min-h-[400px] border border-white shadow-xl relative group overflow-hidden`}
+                      transition={{ delay: idx * 0.15, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                      className={`premium-card p-2 group overflow-hidden`}
                     >
-                      {/* Realistic Mockup Visualization */}
-                      <div className="relative w-full aspect-square mb-8 flex items-center justify-center">
+                      {/* Realistic Mockup Canvas */}
+                      <div className={`aspect-[4/5] rounded-[20px] bg-gradient-to-br ${item.theme} mb-4 relative flex items-center justify-center p-8`}>
                         {/* Shadow underneath */}
-                        <div className="absolute bottom-4 w-3/4 h-8 bg-black/5 blur-2xl rounded-full" />
+                        <div className="absolute bottom-10 w-2/3 h-10 bg-black/10 blur-3xl rounded-full" />
                         
-                        {/* Mockup Base */}
-                        <div className="absolute inset-0 flex items-center justify-center opacity-5 select-none pointer-events-none">
+                        {/* Mockup Base Icon Placeholder (Improved) */}
+                        <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] select-none pointer-events-none scale-150">
                            <ShoppingBag className="w-48 h-48 text-gray-900" />
                         </div>
 
-                        {/* The Drafted Image */}
+                        {/* The Mockup Layer */}
                         <motion.div 
                           initial={{ scale: 0.9, opacity: 0 }}
                           animate={{ scale: 1, opacity: 1 }}
-                          transition={{ delay: 0.3 + idx * 0.1 }}
+                          transition={{ delay: 0.5 + idx * 0.1 }}
                           style={{ rotate: item.rotate }}
-                          className="relative w-4/5 h-4/5 bg-white p-2 shadow-[-10px_20px_40px_rgba(0,0,0,0.1)] rounded-sm border-[12px] border-white ring-1 ring-gray-100"
+                          className="relative w-full h-full bg-white p-3 shadow-premium rounded-sm border-white"
                         >
                           <img 
                             src={uploadedImage!} 
                             alt={item.name} 
-                            className="w-full h-full object-cover mix-blend-multiply opacity-90 shadow-inner"
+                            className="w-full h-full object-cover mix-blend-multiply opacity-95"
                           />
-                          {/* Gloss effect overlay */}
-                          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-white/20 pointer-events-none" />
+                          {/* Gloss & Texture Effect Overlay */}
+                          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 pointer-events-none shadow-inner" />
+                          <div className="absolute inset-0 opacity-[0.02] pointer-events-none mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/fabric-plaid.png')]" />
                         </motion.div>
+                        
+                        {/* Floating Badge */}
+                        <div className="absolute top-6 left-6 px-3 py-1 glass rounded-full text-[10px] font-black text-primary-600 tracking-tighter">
+                          AUTO-MOCKUP V2
+                        </div>
                       </div>
                       
-                  <div className="text-center space-y-2">
-                    <button 
-                      onClick={() => {
-                        const p = products.find(p => p.name.includes(item.category)) || products[0];
-                        setSelectedProduct(p);
-                        setIsOrderModalOpen(true);
-                      }}
-                      className="bg-white px-6 py-3 rounded-full text-sm font-bold text-gray-900 shadow-lg hover:shadow-xl transition-all border border-gray-50 flex items-center gap-2 group-hover:scale-105 active:scale-95 w-full justify-center"
-                    >
-                      바로 주문 <ArrowRight className="w-4 h-4" />
-                    </button>
-                    <Link 
-                      href={`/editor/${(products.find(p => p.name.includes(item.category)) || products[0]).id}?imageUrl=${encodeURIComponent(uploadedImage!)}`}
-                      className="bg-gray-900/10 backdrop-blur-md px-6 py-3 rounded-full text-sm font-bold text-gray-900 hover:bg-gray-900/20 transition-all flex items-center gap-2 w-full justify-center border border-black/5"
-                    >
-                      편집하기 <Layers className="w-4 h-4" />
-                    </Link>
-                  </div>
+                      <div className="p-6">
+                        <div className="flex justify-between items-start mb-6">
+                          <div>
+                            <span className="text-primary-600 font-black text-xs uppercase tracking-widest block mb-1">{item.category}</span>
+                            <h3 className="text-xl font-display font-black text-gray-900">{item.name}</h3>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-3">
+                          <button 
+                            onClick={() => {
+                              const p = products.find(p => p.name.includes(item.category)) || products[0];
+                              setSelectedProduct(p);
+                              setIsOrderModalOpen(true);
+                            }}
+                            className="bg-gray-900 text-white py-4 rounded-[16px] text-sm font-bold flex items-center justify-center gap-2 hover:bg-gray-800 transition-all active:scale-95"
+                          >
+                            바로 주문 <ArrowRight className="w-4 h-4" />
+                          </button>
+                          <Link 
+                            href={`/editor/${(products.find(p => p.name.includes(item.category)) || products[0]).id}?imageUrl=${encodeURIComponent(uploadedImage!)}`}
+                            className="bg-white border-2 border-gray-100 text-gray-900 py-4 rounded-[16px] text-sm font-bold hover:border-primary-200 transition-all active:scale-95 flex items-center justify-center gap-2"
+                          >
+                            편집하기 <Layers className="w-4 h-4" />
+                          </Link>
+                        </div>
+                      </div>
                     </motion.div>
                   ))}
                 </div>
@@ -368,106 +395,14 @@ export default function CreateClientContent({ products }: { products: Product[] 
         </div>
       </section>
 
-      {/* Global Order Modal */}
-      <AnimatePresence>
-        {isOrderModalOpen && selectedProduct && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsOrderModalOpen(false)}
-              className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh]"
-            >
-              {/* Left: Preview */}
-              <div className="w-full md:w-1/2 bg-gray-50 p-8 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-gray-100">
-                <div className="relative aspect-square w-full max-w-sm rounded-2xl overflow-hidden bg-white shadow-inner border border-gray-100 p-8">
-                   <div className="absolute inset-0 flex items-center justify-center opacity-5">
-                      <ShoppingBag className="w-32 h-32 text-gray-400" />
-                   </div>
-                   <div className="relative w-full h-full flex items-center justify-center border-4 border-white shadow-xl rotate-[-2deg]">
-                      <img 
-                        src={uploadedImage!} 
-                        alt="Final Mockup" 
-                        className="w-full h-full object-cover"
-                      />
-                   </div>
-                </div>
-                <div className="mt-6 text-center">
-                  <span className="text-primary-600 font-bold text-sm uppercase tracking-widest">{selectedProduct.category}</span>
-                  <h3 className="text-2xl font-black text-gray-900 mt-1">{selectedProduct.name}</h3>
-                </div>
-              </div>
-
-              {/* Right: Checkout Form */}
-              <div className="w-full md:w-1/2 p-8 overflow-y-auto">
-                <div className="flex justify-between items-start mb-8">
-                  <div>
-                    <h2 className="text-2xl font-black text-gray-900">주문하기</h2>
-                    <p className="text-gray-500 text-sm mt-1">배송 정보를 입력해 주세요. (영업일 기준 5~7일 소요)</p>
-                  </div>
-                  <button 
-                    onClick={() => setIsOrderModalOpen(false)}
-                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                  >
-                    <X className="w-6 h-6 text-gray-400" />
-                  </button>
-                </div>
-
-                <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); alert('Global Order Placed!'); setIsOrderModalOpen(false); }}>
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                       <Globe className="w-4 h-4 text-primary-500" /> 배송 국가
-                    </label>
-                    <select className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none font-medium">
-                      <option>대한민국 (KR)</option>
-                      <option>미국 (US)</option>
-                      <option>일본 (JP)</option>
-                    </select>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-2">수령인 성함</label>
-                      <input type="text" placeholder="홍길동" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none font-medium" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-2">연락처</label>
-                      <input type="text" placeholder="010-0000-0000" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none font-medium" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">상세 주소 (배송지)</label>
-                    <textarea rows={2} placeholder="도로명 주소 및 상세 주소를 입력해 주세요" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none font-medium resize-none"></textarea>
-                  </div>
-
-                  <div className="pt-4 border-t border-gray-100">
-                    <div className="flex justify-between items-center mb-4">
-                      <span className="text-gray-500 font-medium">최종 결제 금액</span>
-                      <span className="text-2xl font-black text-gray-900">{(selectedProduct.price).toLocaleString()}원</span>
-                    </div>
-                    <button className="w-full py-4 bg-primary-600 text-white rounded-2xl font-black text-lg flex items-center justify-center gap-3 hover:bg-primary-700 transition-colors shadow-lg shadow-primary-500/20">
-                      <CreditCard className="w-6 h-6" />
-                      결제 및 주문 완료
-                    </button>
-                    <p className="text-center text-xs text-gray-400 mt-4 leading-relaxed">
-                      By clicking the button, you agree to GOODZZ's <br />
-                      Terms of Service and Global Shipping Policy.
-                    </p>
-                  </div>
-                </form>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      {selectedProduct && uploadedImage && (
+        <OrderModal 
+          isOpen={isOrderModalOpen}
+          onClose={() => setIsOrderModalOpen(false)}
+          product={selectedProduct}
+          customDesignUrl={uploadedImage}
+        />
+      )}
     </>
   );
 }
