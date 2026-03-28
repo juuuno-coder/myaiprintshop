@@ -18,7 +18,7 @@ export default async function CreatePage() {
   const products = await getProducts();
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-[100dvh]">
       <Navbar />
       <CreateClientContent products={products} />
       <Footer />
