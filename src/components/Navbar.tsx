@@ -68,56 +68,70 @@ export default function Navbar() {
   return (
     <>
       {/* Stripe-style Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200">
+      {/* Premium Glassy Navbar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-black/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center h-20">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2 group">
-              <Image 
-                src="/logo.png" 
-                alt="GOODZZ" 
-                width={120} 
-                height={36} 
-                className="h-7 w-auto object-contain"
-                priority 
-              />
+              <span className="text-2xl font-display font-black tracking-tighter text-gray-900 group-hover:text-primary-600 transition-colors">
+                GOODZZ<span className="text-primary-600">.</span>
+              </span>
             </Link>
 
-            {/* Desktop Menu - 심플하게 */}
-            <div className="hidden md:flex items-center gap-1">
-              <Link href="/" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-md hover:bg-gray-50">홈</Link>
-              <Link href="/shop" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-md hover:bg-gray-50">모든 상품</Link>
-              <Link href="/create" className="px-3 py-2 text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors rounded-md hover:bg-primary-50">사진으로 만들기</Link>
-              <Link href="/mypage" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-md hover:bg-gray-50">마이페이지</Link>
+            {/* Desktop Menu - Premium Typography */}
+            <div className="hidden md:flex items-center gap-2">
+              {[
+                { name: '홈', href: '/' },
+                { name: '모든 상품', href: '/shop' },
+                { name: '사진으로 만들기', href: '/create', primary: true },
+                { name: '마이페이지', href: '/mypage' },
+              ].map((item) => (
+                <Link 
+                  key={item.href}
+                  href={item.href} 
+                  className={`px-5 py-2 text-sm font-bold tracking-tight rounded-full transition-all ${
+                    item.primary 
+                      ? 'text-primary-600 hover:bg-primary-50' 
+                      : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
+                >
+                  {item.name}
+                </Link>
+              ))}
             </div>
 
-            {/* Desktop Icons - 미니멀하게 */}
-            <div className="hidden md:flex items-center gap-3">
+            {/* Desktop Icons */}
+            <div className="hidden md:flex items-center gap-4">
               <Link
                 href="/create"
-                className="btn btn-primary btn-sm hidden lg:flex mr-2"
+                className="px-6 py-2.5 bg-gray-900 text-white rounded-full text-sm font-bold hover:bg-gray-800 transition-all shadow-lg hover:shadow-gray-200 active:scale-95"
               >
                 무료로 시작하기
               </Link>
-              <button
-                onClick={() => setIsSearchOpen(true)}
-                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
-                title="검색"
-              >
-                <Search className="w-5 h-5" />
-              </button>
-              <Link
-                href="/cart"
-                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors relative"
-              >
-                <ShoppingCart className="w-5 h-5" />
-                {mounted && cartCount > 0 && (
-                  <span className="absolute top-0 right-0 bg-primary-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-medium">
-                    {cartCount}
-                  </span>
-                )}
-              </Link>
-              <AuthButton />
+              <div className="flex items-center">
+                <button
+                  onClick={() => setIsSearchOpen(true)}
+                  className="p-2.5 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-full transition-all"
+                  title="검색"
+                >
+                  <Search className="w-5 h-5" />
+                </button>
+                <Link
+                  href="/cart"
+                  className="p-2.5 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-full transition-all relative"
+                >
+                  <ShoppingCart className="w-5 h-5" />
+                  {mounted && cartCount > 0 && (
+                    <span className="absolute top-1 right-1 bg-primary-600 text-white text-[10px] w-4.5 h-4.5 rounded-full flex items-center justify-center font-black">
+                      {cartCount}
+                    </span>
+                  )}
+                </Link>
+                <div className="ml-2 pl-4 border-l border-gray-100">
+                   <AuthButton />
+                </div>
+              </div>
             </div>
 
             {/* Mobile Menu Button */}

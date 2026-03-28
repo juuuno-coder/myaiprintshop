@@ -1,0 +1,11 @@
+node_modules
+.next
+.git
+.gitignore
+.env*
+myaiprintshop
+references
+*.log
+docker-compose.yml
+Dockerfile
+deploy.sh

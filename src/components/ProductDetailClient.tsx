@@ -19,6 +19,10 @@ import Image from 'next/image';
 import { uploadDesignImage } from '@/lib/designs';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
+import ReviewGrid from './reviews/ReviewGrid';
+import ReviewModal from './ReviewModal';
+import { useAuth } from '@/context/AuthContext';
+import { Camera } from 'lucide-react';
 
 interface ProductDetailClientProps {
   product: Product;
@@ -27,6 +31,7 @@ interface ProductDetailClientProps {
 export default function ProductDetailClient({ product }: ProductDetailClientProps) {
   const router = useRouter();
   const { addToCart } = useStore();
+  const { user } = useAuth();
   
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [selectedColor, setSelectedColor] = useState<string>('');
@@ -35,6 +40,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   // AI & Order State
   const [orderMethod, setOrderMethod] = useState<'self' | 'request' | 'upload'>('self');
   const [isAiMode, setIsAiMode] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
   const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
@@ -732,6 +738,166 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           </div>
         )}
       </AnimatePresence>
+
+      {/* Reviews Section (NEW PREMIUM GRID) */}
+      <div className="mt-32 border-t border-gray-100 pt-20">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-50 text-primary-600 text-[10px] font-black uppercase tracking-widest mb-3">
+                  <Star size={12} className="fill-current" /> Customer Satisfaction
+              </div>
+              <h2 className="text-3xl font-black text-gray-900 tracking-tight">사장님들의 <span className="text-primary-600">리얼 후기</span></h2>
+              <p className="text-gray-400 text-sm mt-2 leading-relaxed max-w-md">
+                  실제 구매 고객님들이 직접 디자인하고 제작한 상품들의<br />
+                  생생한 후기와 퀄리티를 확인해보세요.
+              </p>
+            </div>
+            
+            <button 
+                onClick={() => setShowReviewModal(true)}
+                className="group px-8 py-4 bg-gray-900 text-white rounded-2xl text-xs font-black hover:bg-primary-600 transition-all duration-300 shadow-xl flex items-center gap-3"
+            >
+                <Camera size={16} className="group-hover:rotate-12 transition-transform" />
+                포토 후기 작성하기
+            </button>
+        </div>
+
+        <ReviewGrid reviews={reviews} isLoading={reviewsLoading} />
+      </div>
+
+      {/* Bulk Order Inquiry Modal */}
+      <AnimatePresence>
+        {showBulkModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowBulkModal(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden overflow-y-auto max-h-[90vh]"
+            >
+              <div className="p-8">
+                <div className="flex justify-between items-start mb-6">
+                  <div>
+                    <h2 className="text-2xl font-black text-gray-900">대량주문 문의</h2>
+                    <p className="text-gray-500 text-sm mt-1">{product.name}</p>
+                  </div>
+                  <button onClick={() => setShowBulkModal(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                    <X size={24} />
+                  </button>
+                </div>
+
+                <form onSubmit={handleBulkSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500">이름 <span className="text-red-500">*</span></label>
+                    <input
+                      type="text"
+                      required
+                      value={bulkForm.name}
+                      onChange={(e) => setBulkForm(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="담당자명"
+                      className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500">연락처 <span className="text-red-500">*</span></label>
+                    <input
+                      type="tel"
+                      required
+                      value={bulkForm.phone}
+                      onChange={(e) => setBulkForm(prev => ({ ...prev, phone: e.target.value }))}
+                      placeholder="010-0000-0000"
+                      className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500">이메일 <span className="text-red-500">*</span></label>
+                    <input
+                      type="email"
+                      required
+                      value={bulkForm.email}
+                      onChange={(e) => setBulkForm(prev => ({ ...prev, email: e.target.value }))}
+                      placeholder="example@email.com"
+                      className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500">희망 수량 <span className="text-red-500">*</span></label>
+                    <input
+                      type="number"
+                      required
+                      min="1"
+                      value={bulkForm.quantity}
+                      onChange={(e) => setBulkForm(prev => ({ ...prev, quantity: e.target.value }))}
+                      placeholder="100"
+                      className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500">문의 내용</label>
+                    <textarea
+                      value={bulkForm.message}
+                      onChange={(e) => setBulkForm(prev => ({ ...prev, message: e.target.value }))}
+                      placeholder="추가 요청사항이나 문의 내용을 작성해주세요"
+                      rows={4}
+                      className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={bulkSubmitting}
+                    className="w-full py-4 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {bulkSubmitting ? (
+                      <>
+                        <Loader2 className="animate-spin" size={20} />
+                        접수 중...
+                      </>
+                    ) : (
+                      <>
+                        <MessageSquare size={20} />
+                        문의 접수하기
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Review Write Modal */}
+      <ReviewModal 
+        isOpen={showReviewModal}
+        onClose={() => setShowReviewModal(false)}
+        productId={product.id}
+        productName={product.name}
+        userId={user?.uid || 'anonymous'}
+        userName={user?.displayName || '익명'}
+        onSuccess={() => {
+            // Re-fetch reviews
+            const fetchReviews = async () => {
+                setReviewsLoading(true);
+                try {
+                  const res = await fetch(`/api/reviews?productId=${product.id}`);
+                  const data = await res.json();
+                  if (data.success) setReviews(data.reviews);
+                } catch (error) {
+                  console.error('Error fetching reviews:', error);
+                } finally {
+                  setReviewsLoading(false);
+                }
+              };
+              fetchReviews();
+        }}
+      />
     </div>
   );
 }

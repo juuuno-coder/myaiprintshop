@@ -7,6 +7,7 @@ import {
   Save,
   Loader2,
   ShoppingCart,
+  CheckCircle2,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEditorStore } from '@/store/useEditorStore';
@@ -15,6 +16,7 @@ import { useStore } from '@/store/useStore';
 import { saveDesign, uploadDesignImage } from '@/lib/designs';
 import { exportToPNG } from '@/lib/fabric/export-utils';
 import { toast } from 'sonner';
+import OrderModal from '../common/OrderModal';
 
 export default function EditorHeader() {
   const router = useRouter();
@@ -30,6 +32,9 @@ export default function EditorHeader() {
     faceCanvasStates,
     activeFace,
   } = useEditorStore();
+
+  const [isOrderModalOpen, setIsOrderModalOpen] = React.useState(false);
+  const [orderImageUrl, setOrderImageUrl] = React.useState<string | null>(null);
 
   const hasDesign = canvasRef
     ? canvasRef.getObjects().some((o: any) => !o._isBgMockup && !o._isPrintZone)
@@ -92,32 +97,25 @@ export default function EditorHeader() {
     if (!product || !canvasRef) return;
     setIsSaving(true);
     try {
+      // 1. 고해상도 제작 도안 추출
       const previewDataUrl = canvasRef.toDataURL({
         format: 'png',
-        multiplier: 3, // 고해상도 제작 도안급 추출
+        multiplier: 3, 
       });
+      
+      // 2. 이미지 업로드
       const uploadedUrl = await uploadDesignImage(
         user?.uid || 'guest',
         previewDataUrl
       );
+      
       const finalImageUrl = uploadedUrl || previewDataUrl;
-
-      addToCart({
-        productId: product.id,
-        name: product.name,
-        price: product.price,
-        thumbnail: product.thumbnail,
-        quantity: 1,
-        customDesignUrl: finalImageUrl,
-        selectedOptions: [
-          { groupLabel: '디자인 방식', valueLabel: 'AI 실시간 커스텀' },
-        ],
-      });
-
-      toast.success('선택하신 디자인이 장바구니에 담겼습니다!');
-      router.push('/checkout');
+      setOrderImageUrl(finalImageUrl);
+      setIsOrderModalOpen(true);
+      
     } catch (error) {
-      toast.error('주문 처리 중 오류가 발생했습니다.');
+      console.error('Order preparation error:', error);
+      toast.error('주문 준비 중 오류가 발생했습니다.');
     } finally {
       setIsSaving(false);
     }
@@ -125,60 +123,78 @@ export default function EditorHeader() {
 
   return (
     <>
-      <header className="h-16 bg-white border-b flex justify-between items-center px-6 shrink-0 z-30 shadow-xs">
-        <div className="flex items-center gap-4">
+      <header className="h-20 glass border-b border-black/5 flex justify-between items-center px-8 shrink-0 z-30">
+        <div className="flex items-center gap-6">
           <button
             onClick={() => router.back()}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-full transition-all active:scale-90"
           >
-            <ChevronLeft size={20} />
+            <ChevronLeft size={24} className="text-gray-600" />
           </button>
           <div className="flex flex-col">
-            <h1 className="text-sm font-bold text-gray-900 leading-tight">
-              제미나이 스튜디오 Pro
-            </h1>
-            <p className="text-[10px] text-gray-400 font-medium uppercase tracking-tighter">
-              {product?.name}
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg font-display font-black text-gray-900 tracking-tighter">
+                GOODZZ Studio
+              </h1>
+              <span className="px-2 py-0.5 bg-gradient-to-r from-primary-600 to-primary-400 text-[10px] font-black text-white rounded-md tracking-widest uppercase">
+                Pro
+              </span>
+            </div>
+            <p className="text-[11px] text-gray-400 font-bold uppercase tracking-[0.2em] mt-0.5">
+              Editing: {product?.name || 'New Project'}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handleExportPNG}
-            disabled={!hasDesign}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-xs font-bold hover:bg-gray-50 transition-all disabled:opacity-50"
-          >
-            <Download size={14} /> PNG 내보내기
-          </button>
-          <button
-            onClick={handleSaveDraft}
-            disabled={isSaving || !hasDesign}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-xs font-bold hover:bg-gray-50 transition-all disabled:opacity-50"
-          >
-            {isSaving ? (
-              <Loader2 size={14} className="animate-spin" />
-            ) : (
-              <Save size={14} />
-            )}
-            저장하기
-          </button>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 mr-4 border-r border-gray-100 pr-4">
+             <button
+              onClick={handleExportPNG}
+              disabled={!hasDesign}
+              className="p-2.5 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-full transition-all disabled:opacity-30"
+              title="PNG 내보내기"
+            >
+              <Download size={20} />
+            </button>
+            <button
+              onClick={handleSaveDraft}
+              disabled={isSaving || !hasDesign}
+              className="p-2.5 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-full transition-all disabled:opacity-30"
+              title="디자인 저장"
+            >
+              {isSaving ? (
+                <Loader2 size={20} className="animate-spin text-primary-500" />
+              ) : (
+                <Save size={20} />
+              )}
+            </button>
+          </div>
+
           <button
             onClick={handleOrder}
             disabled={!hasDesign || isSaving}
-            className="flex items-center gap-2 px-5 py-2 bg-primary-600 text-white rounded-xl text-xs font-bold hover:bg-primary-700 transition-all shadow-lg shadow-primary-100 disabled:opacity-50"
+            className="px-8 py-3 bg-gray-900 text-white rounded-full text-sm font-black hover:bg-black transition-all shadow-[0_12px_32px_-8px_rgba(0,0,0,0.2)] active:scale-95 disabled:opacity-50 flex items-center gap-2"
           >
-            <ShoppingCart size={14} /> 제작 요청 & 주문하기
+            <ShoppingCart size={18} />
+            주문하기
           </button>
         </div>
       </header>
 
-      {/* Demo Mode Banner */}
+      {/* Demo Mode Banner (Premium Style) */}
       {generationMode && generationMode !== 'real' && (
-        <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-center text-xs text-amber-700 font-medium shrink-0">
-          데모 모드: 실제 AI 생성이 아닌 샘플 이미지가 표시됩니다. 실제 생성을
-          위해 GOOGLE_API_KEY를 설정하세요.
+        <div className="bg-primary-50/50 backdrop-blur-sm px-4 py-2 text-center text-[11px] text-primary-600 font-black uppercase tracking-widest shrink-0 border-b border-primary-100/50">
+          Demo Mode: Integration samples active
         </div>
+      )}
+
+      {isOrderModalOpen && product && orderImageUrl && (
+        <OrderModal 
+          isOpen={isOrderModalOpen}
+          onClose={() => setIsOrderModalOpen(false)}
+          product={product}
+          customDesignUrl={orderImageUrl}
+        />
       )}
     </>
   );

@@ -33,8 +33,10 @@ export interface DesignDraft {
 
 const DESIGNS_COLLECTION = 'designs';
 
+import { uploadFile } from './storage-service';
+
 /**
- * AI 디자인 이미지를 Firebase Storage에 업로드합니다.
+ * AI 디자인 이미지를 통합 스토리지 시스템에 업로드합니다.
  * @param userId 사용자 ID
  * @param imageSource 이미지 URL 또는 base64 데이터
  * @returns 업로드된 이미지의 영구 다운로드 URL
@@ -42,22 +44,17 @@ const DESIGNS_COLLECTION = 'designs';
 export async function uploadDesignImage(userId: string, imageSource: string): Promise<string | null> {
   try {
     const filename = `${Date.now()}_${Math.random().toString(36).substring(7)}.png`;
-    const storageRef = ref(storage, `designs/${userId}/${filename}`);
+    const path = `designs/${userId}/${filename}`;
 
+    let fileData: string | Blob;
     if (imageSource.startsWith('data:image')) {
-      // Base64 업로드
-      await uploadString(storageRef, imageSource, 'data_url');
+      fileData = imageSource;
     } else {
-      // URL로부터 이미지 페치 및 업로드 (CORS 주의)
-      // 주의: 클라이언트 측에서 직접 대량 이미지를 fetch할 때 CORS 에러가 날 수 있음.
-      // OpenAI/Unsplash 등은 보통 클라이언트 측 fetch를 허용하거나, 업로드할 이미지를 브라우저에서 canvas로 그려서 가져와야 함.
       const response = await fetch(imageSource);
-      const blob = await response.blob();
-      await uploadBytes(storageRef, blob);
+      fileData = await response.blob();
     }
 
-    const downloadURL = await getDownloadURL(storageRef);
-    return downloadURL;
+    return await uploadFile(fileData, { path });
   } catch (error) {
     console.error('Error uploading design image:', error);
     return null;

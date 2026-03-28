@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GOODZZ — 사진 한 장으로 나만의 굿즈를</title>
+  <meta name="description" content="AI가 내 사진을 굿즈로 만들어드립니다. 명함, 스티커, 포스터, 에코백까지. 주문부터 배송까지 3분이면 충분합니다.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css">
+  <script src="https://code.iconify.design/iconify-icon/2.3.0/iconify-icon.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Pretendard', 'Outfit', 'system-ui', 'sans-serif'],
+            display: ['Outfit', 'Pretendard', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              amber: '#F59E0B',
+              'amber-light': '#FCD34D',
+              'amber-dark': '#B45309',
+            }
+          }
+        },
+      },
+    }
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Pretendard', 'Outfit', system-ui, sans-serif;
+      background-color: #09090b;
+      color: #e4e4e7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Grain texture overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      pointer-events: none;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    }
+
+    /* Korean word break */
+    .ko { word-break: keep-all; }
+
+    /* Staggered fade-in */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(2rem); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-12px); }
+    }
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+    @keyframes countUp {
+      from { opacity: 0; transform: translateY(1rem); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse-amber {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+      70% { box-shadow: 0 0 0 12px rgba(245, 158, 11, 0); }
+    }
+
+    .fade-in { opacity: 0; animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .fade-in-1 { animation-delay: 0ms; }
+    .fade-in-2 { animation-delay: 120ms; }
+    .fade-in-3 { animation-delay: 240ms; }
+    .fade-in-4 { animation-delay: 360ms; }
+    .fade-in-5 { animation-delay: 480ms; }
+
+    .float-anim { animation: float 6s ease-in-out infinite; }
+
+    /* Glass nav */
+    .glass-nav {
+      background: rgba(9, 9, 11, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    /* Glass card */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    /* Gradient mesh background */
+    .mesh-bg {
+      background-image:
+        radial-gradient(ellipse 80% 60% at 20% -10%, rgba(245,158,11,0.12) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 50% at 80% 110%, rgba(245,158,11,0.08) 0%, transparent 50%),
+        radial-gradient(ellipse 40% 40% at 50% 50%, rgba(120,53,15,0.05) 0%, transparent 60%);
+    }
+
+    /* CTA button */
+    .cta-btn {
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: pulse-amber 3s ease-in-out infinite;
+    }
+    .cta-btn:hover { transform: scale(1.03); }
+    .cta-btn:active { transform: scale(0.97); }
+
+    /* Marquee */
+    .marquee-track { animation: marquee 30s linear infinite; }
+
+    /* Reveal on scroll */
+    .reveal { opacity: 0; transform: translateY(2rem); transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* Bento hover */
+    .bento-card { transition: all 0.3s cubic-bezier(0.16,1,0.3,1); }
+    .bento-card:hover { transform: translateY(-4px); border-color: rgba(245,158,11,0.3); }
+  </style>
+</head>
+<body class="min-h-[100dvh]">
+
+  <!-- ═══════════════ NAVIGATION ═══════════════ -->
+  <nav class="glass-nav fixed top-0 left-0 right-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="/" class="flex items-center gap-2 group">
+          <div class="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
+            <iconify-icon icon="solar:gift-bold" class="text-zinc-950 text-lg"></iconify-icon>
+          </div>
+          <span class="font-display font-bold text-xl tracking-tight text-white">GOODZZ</span>
+        </a>
+        <div class="hidden md:flex items-center gap-8">
+          <a href="#features" class="text-sm text-zinc-400 hover:text-white transition-colors duration-200 ko">기능</a>
+          <a href="#how" class="text-sm text-zinc-400 hover:text-white transition-colors duration-200 ko">이용 방법</a>
+          <a href="#reviews" class="text-sm text-zinc-400 hover:text-white transition-colors duration-200 ko">후기</a>
+          <a href="/shop" class="text-sm text-zinc-400 hover:text-white transition-colors duration-200 ko">상품 보기</a>
+        </div>
+        <div class="flex items-center gap-3">
+          <a href="/auth" class="hidden sm:block text-sm text-zinc-400 hover:text-white transition-colors duration-200 ko">로그인</a>
+          <a href="/create" class="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-semibold text-sm px-4 py-2.5 rounded-lg transition-all duration-300 ko">
+            <iconify-icon icon="solar:add-square-bold"></iconify-icon>
+            지금 만들기
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══════════════ HERO ═══════════════ -->
+  <section class="mesh-bg min-h-[100dvh] flex items-center pt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 w-full">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <!-- Left: Text -->
+        <div>
+          <div class="fade-in fade-in-1 inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass-card mb-8">
+            <span class="w-2 h-2 bg-amber-400 rounded-full"></span>
+            <span class="text-xs text-zinc-400 ko">지금 47,200명이 굿즈를 만들고 있습니다</span>
+          </div>
+          <h1 class="fade-in fade-in-2 font-display font-black text-5xl sm:text-6xl lg:text-7xl leading-tight tracking-tight text-white ko mb-6">
+            사진 한 장으로<br>
+            <span class="text-amber-400">나만의 굿즈를.</span>
+          </h1>
+          <p class="fade-in fade-in-3 text-zinc-400 text-lg leading-relaxed max-w-[55ch] ko mb-10">
+            AI가 내 사진을 분석해 최적의 굿즈 시안을 만들어드립니다.<br>
+            명함부터 포스터, 스티커, 에코백까지. 주문부터 배송까지 3분이면 됩니다.
+          </p>
+          <div class="fade-in fade-in-4 flex flex-col sm:flex-row gap-4">
+            <a href="/create" class="cta-btn flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-lg px-8 py-4 rounded-xl min-h-[56px] ko">
+              <iconify-icon icon="solar:magic-stick-3-bold"></iconify-icon>
+              사진으로 굿즈 만들기
+            </a>
+            <a href="/shop" class="flex items-center justify-center gap-2 glass-card hover:border-zinc-600 text-white font-semibold text-lg px-8 py-4 rounded-xl min-h-[56px] transition-all duration-300 ko">
+              상품 구경하기
+              <iconify-icon icon="solar:arrow-right-linear"></iconify-icon>
+            </a>
+          </div>
+          <div class="fade-in fade-in-5 flex items-center gap-6 mt-10 pt-10 border-t border-zinc-800">
+            <div>
+              <div class="font-display font-bold text-2xl text-white">47,200<span class="text-amber-400">+</span></div>
+              <div class="text-xs text-zinc-500 ko">총 주문 건수</div>
+            </div>
+            <div class="w-px h-10 bg-zinc-800"></div>
+            <div>
+              <div class="font-display font-bold text-2xl text-white">4.87<span class="text-amber-400">/5</span></div>
+              <div class="text-xs text-zinc-500 ko">고객 만족도</div>
+            </div>
+            <div class="w-px h-10 bg-zinc-800"></div>
+            <div>
+              <div class="font-display font-bold text-2xl text-white">3<span class="text-amber-400">분</span></div>
+              <div class="text-xs text-zinc-500 ko">평균 주문 완료 시간</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Visual -->
+        <div class="relative flex justify-center lg:justify-end">
+          <div class="float-anim relative">
+            <!-- Main card -->
+            <div class="glass-card rounded-3xl p-5 w-80 sm:w-96">
+              <div class="rounded-2xl overflow-hidden mb-4 aspect-square bg-zinc-800">
+                <img src="https://picsum.photos/seed/goodzz-product/400/400" alt="굿즈 미리보기" class="w-full h-full object-cover" loading="lazy" decoding="async">
+              </div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="font-semibold text-white text-sm ko">나만의 에코백</div>
+                  <div class="text-zinc-400 text-xs ko mt-0.5">AI 시안 완성 · 즉시 주문 가능</div>
+                </div>
+                <div class="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center">
+                  <iconify-icon icon="solar:cart-large-4-bold" class="text-zinc-950 text-lg"></iconify-icon>
+                </div>
+              </div>
+            </div>
+            <!-- Floating badge top-right -->
+            <div class="absolute -top-4 -right-4 glass-card rounded-2xl px-3 py-2 flex items-center gap-2">
+              <iconify-icon icon="solar:star-bold" class="text-amber-400 text-base"></iconify-icon>
+              <span class="text-white text-xs font-semibold">AI 자동 시안</span>
+            </div>
+            <!-- Floating badge bottom-left -->
+            <div class="absolute -bottom-4 -left-4 glass-card rounded-2xl px-3 py-2 flex items-center gap-2">
+              <iconify-icon icon="solar:delivery-bold" class="text-amber-400 text-base"></iconify-icon>
+              <span class="text-white text-xs font-semibold ko">국내외 배송</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ LOGO / TRUST STRIP ═══════════════ -->
+  <section class="py-12 border-y border-zinc-800 overflow-hidden">
+    <div class="mb-4 text-center">
+      <p class="text-xs text-zinc-600 ko uppercase tracking-widest">믿고 사용하는 고객사</p>
+    </div>
+    <div class="relative">
+      <div class="marquee-track flex gap-16 items-center whitespace-nowrap" style="width: max-content;">
+        <span class="text-zinc-600 font-semibold text-sm">스텔라랩스</span>
+        <span class="text-zinc-600 font-semibold text-sm">베리파이코리아</span>
+        <span class="text-zinc-600 font-semibold text-sm">루미너스</span>
+        <span class="text-zinc-600 font-semibold text-sm">클라우드파스</span>
+        <span class="text-zinc-600 font-semibold text-sm">위브스튜디오</span>
+        <span class="text-zinc-600 font-semibold text-sm">넥타르샵</span>
+        <span class="text-zinc-600 font-semibold text-sm">그레이풋</span>
+        <span class="text-zinc-600 font-semibold text-sm">아톰미디어</span>
+        <!-- Duplicate for seamless loop -->
+        <span class="text-zinc-600 font-semibold text-sm">스텔라랩스</span>
+        <span class="text-zinc-600 font-semibold text-sm">베리파이코리아</span>
+        <span class="text-zinc-600 font-semibold text-sm">루미너스</span>
+        <span class="text-zinc-600 font-semibold text-sm">클라우드파스</span>
+        <span class="text-zinc-600 font-semibold text-sm">위브스튜디오</span>
+        <span class="text-zinc-600 font-semibold text-sm">넥타르샵</span>
+        <span class="text-zinc-600 font-semibold text-sm">그레이풋</span>
+        <span class="text-zinc-600 font-semibold text-sm">아톰미디어</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ FEATURES (BENTO GRID) ═══════════════ -->
+  <section id="features" class="py-32">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="reveal mb-16">
+        <p class="text-amber-400 text-sm font-semibold uppercase tracking-widest mb-4 ko">왜 GOODZZ인가</p>
+        <h2 class="font-display font-black text-4xl sm:text-5xl text-white leading-tight ko mb-4">
+          굿즈를 쉽게 만드는<br>가장 빠른 방법
+        </h2>
+        <p class="text-zinc-400 text-lg max-w-[55ch] leading-relaxed ko">
+          복잡한 디자인 툴 없이도, AI가 내 이미지를 분석해 제품에 최적화된 시안을 즉시 제안합니다.
+        </p>
+      </div>
+
+      <!-- Bento Grid: 2fr + 1fr + 1fr layout -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Large card: AI Design -->
+        <div class="bento-card glass-card rounded-3xl p-8 md:col-span-2 reveal">
+          <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center mb-6">
+            <iconify-icon icon="solar:magic-stick-3-bold" class="text-amber-400 text-2xl"></iconify-icon>
+          </div>
+          <h3 class="font-display font-bold text-2xl text-white mb-3 ko">AI가 시안을 자동으로 만들어드립니다</h3>
+          <p class="text-zinc-400 leading-relaxed ko mb-6">사진을 올리면 AI가 상품별 적정 사이즈, 배치, 색상까지 자동으로 조정합니다. 디자인을 몰라도 됩니다.</p>
+          <div class="rounded-2xl overflow-hidden bg-zinc-800/50 aspect-video">
+            <img src="https://picsum.photos/seed/goodzz-ai-design/800/450" alt="AI 시안 생성" class="w-full h-full object-cover opacity-70" loading="lazy" decoding="async">
+          </div>
+        </div>
+
+        <!-- Small card: Speed -->
+        <div class="bento-card glass-card rounded-3xl p-8 reveal" style="transition-delay: 100ms">
+          <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center mb-6">
+            <iconify-icon icon="solar:clock-circle-bold" class="text-amber-400 text-2xl"></iconify-icon>
+          </div>
+          <h3 class="font-display font-bold text-xl text-white mb-3 ko">3분 내 주문 완료</h3>
+          <p class="text-zinc-400 text-sm leading-relaxed ko">사진 업로드부터 결제까지 단 3분. 복잡한 절차 없이 즉시 주문할 수 있습니다.</p>
+          <div class="mt-6 flex items-center gap-2">
+            <div class="font-display font-black text-5xl text-amber-400">3</div>
+            <div class="text-zinc-500 text-sm ko">분<br>이내</div>
+          </div>
+        </div>
+
+        <!-- Small card: Products -->
+        <div class="bento-card glass-card rounded-3xl p-8 reveal" style="transition-delay: 150ms">
+          <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center mb-6">
+            <iconify-icon icon="solar:box-bold" class="text-amber-400 text-2xl"></iconify-icon>
+          </div>
+          <h3 class="font-display font-bold text-xl text-white mb-3 ko">100가지 이상의 굿즈</h3>
+          <p class="text-zinc-400 text-sm leading-relaxed ko">명함, 스티커, 포스터, 에코백, 마스킹테이프까지. 원하는 거의 모든 굿즈를 한 곳에서.</p>
+          <div class="mt-6 grid grid-cols-3 gap-2">
+            <div class="glass-card rounded-xl p-2 flex flex-col items-center gap-1">
+              <iconify-icon icon="solar:card-2-bold" class="text-amber-400 text-lg"></iconify-icon>
+              <span class="text-zinc-500 text-xs ko">명함</span>
+            </div>
+            <div class="glass-card rounded-xl p-2 flex flex-col items-center gap-1">
+              <iconify-icon icon="solar:sticker-bold" class="text-amber-400 text-lg"></iconify-icon>
+              <span class="text-zinc-500 text-xs ko">스티커</span>
+            </div>
+            <div class="glass-card rounded-xl p-2 flex flex-col items-center gap-1">
+              <iconify-icon icon="solar:bag-4-bold" class="text-amber-400 text-lg"></iconify-icon>
+              <span class="text-zinc-500 text-xs ko">에코백</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Large card: Global Delivery -->
+        <div class="bento-card glass-card rounded-3xl p-8 md:col-span-2 reveal" style="transition-delay: 200ms">
+          <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center mb-6">
+            <iconify-icon icon="solar:delivery-bold" class="text-amber-400 text-2xl"></iconify-icon>
+          </div>
+          <h3 class="font-display font-bold text-2xl text-white mb-3 ko">전국 어디서든, 해외까지 배송</h3>
+          <p class="text-zinc-400 leading-relaxed ko mb-6">제작 완료 후 평균 2-5일 내 수령. 국내는 물론 전 세계 주요 도시로 배송해드립니다.</p>
+          <div class="flex gap-4 flex-wrap">
+            <div class="flex items-center gap-2 glass-card px-3 py-2 rounded-xl">
+              <iconify-icon icon="solar:check-circle-bold" class="text-amber-400 text-sm"></iconify-icon>
+              <span class="text-zinc-300 text-sm ko">국내 2-3일 내</span>
+            </div>
+            <div class="flex items-center gap-2 glass-card px-3 py-2 rounded-xl">
+              <iconify-icon icon="solar:check-circle-bold" class="text-amber-400 text-sm"></iconify-icon>
+              <span class="text-zinc-300 text-sm ko">해외 7-14일 내</span>
+            </div>
+            <div class="flex items-center gap-2 glass-card px-3 py-2 rounded-xl">
+              <iconify-icon icon="solar:check-circle-bold" class="text-amber-400 text-sm"></iconify-icon>
+              <span class="text-zinc-300 text-sm ko">실시간 배송 추적</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ HOW IT WORKS ═══════════════ -->
+  <section id="how" class="py-32 border-t border-zinc-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="reveal text-center mb-20">
+        <p class="text-amber-400 text-sm font-semibold uppercase tracking-widest mb-4 ko">이용 방법</p>
+        <h2 class="font-display font-black text-4xl sm:text-5xl text-white leading-tight ko">
+          정말 이렇게 쉬운가요?<br><span class="text-amber-400">네, 그렇습니다.</span>
+        </h2>
+      </div>
+
+      <!-- Zig-zag steps -->
+      <div class="space-y-24">
+        <!-- Step 1: Image left, text right -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center reveal">
+          <div class="rounded-3xl overflow-hidden aspect-square bg-zinc-800">
+            <img src="https://picsum.photos/seed/goodzz-step1/600/600" alt="사진 업로드" class="w-full h-full object-cover" loading="lazy" decoding="async">
+          </div>
+          <div>
+            <div class="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center mb-6">
+              <span class="font-display font-black text-zinc-950">01</span>
+            </div>
+            <h3 class="font-display font-bold text-3xl text-white mb-4 ko">사진을 올려주세요</h3>
+            <p class="text-zinc-400 text-lg leading-relaxed ko">
+              스마트폰으로 찍은 사진도 충분합니다. AI가 자동으로 배경 제거, 밝기 보정, 해상도 최적화를 처리합니다.
+            </p>
+          </div>
+        </div>
+
+        <!-- Step 2: Text left, image right -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center reveal">
+          <div class="order-2 md:order-1">
+            <div class="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center mb-6">
+              <span class="font-display font-black text-zinc-950">02</span>
+            </div>
+            <h3 class="font-display font-bold text-3xl text-white mb-4 ko">원하는 굿즈를 고르세요</h3>
+            <p class="text-zinc-400 text-lg leading-relaxed ko">
+              명함, 포스터, 에코백 등 원하는 상품을 선택하면 AI가 즉시 맞춤 시안을 제안합니다. 에디터로 직접 수정할 수도 있습니다.
+            </p>
+          </div>
+          <div class="order-1 md:order-2 rounded-3xl overflow-hidden aspect-square bg-zinc-800">
+            <img src="https://picsum.photos/seed/goodzz-step2/600/600" alt="상품 선택" class="w-full h-full object-cover" loading="lazy" decoding="async">
+          </div>
+        </div>
+
+        <!-- Step 3: Image left, text right -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center reveal">
+          <div class="rounded-3xl overflow-hidden aspect-square bg-zinc-800">
+            <img src="https://picsum.photos/seed/goodzz-step3/600/600" alt="주문 완료" class="w-full h-full object-cover" loading="lazy" decoding="async">
+          </div>
+          <div>
+            <div class="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center mb-6">
+              <span class="font-display font-black text-zinc-950">03</span>
+            </div>
+            <h3 class="font-display font-bold text-3xl text-white mb-4 ko">주문하고 받으면 끝</h3>
+            <p class="text-zinc-400 text-lg leading-relaxed ko">
+              안전한 결제 후 제작이 시작됩니다. 실시간으로 제작 상태를 확인하고, 빠르게 배송받으세요.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ TESTIMONIALS ═══════════════ -->
+  <section id="reviews" class="py-32 border-t border-zinc-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="reveal mb-16">
+        <p class="text-amber-400 text-sm font-semibold uppercase tracking-widest mb-4 ko">고객 후기</p>
+        <h2 class="font-display font-black text-4xl sm:text-5xl text-white leading-tight ko">
+          실제 사용자들의<br>솔직한 이야기
+        </h2>
+      </div>
+
+      <!-- Masonry-style testimonials -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Long review -->
+        <div class="glass-card rounded-3xl p-7 md:row-span-2 reveal flex flex-col justify-between">
+          <div>
+            <div class="flex gap-1 mb-5">
+              <iconify-icon icon="solar:star-bold" class="text-amber-400 text-base"></iconify-icon>
+              <iconify-icon icon="solar:star-bold" class="text-amber-400 text-base"></iconify-icon>
+              <iconify-icon icon="solar:star-bold" class="text-amber-400 text-base"></iconify-icon>
+              <iconify-icon icon="solar:star-bold" class="text-amber-400 text-base"></iconify-icon>
+              <iconify-icon icon="solar:star-bold" class="text-amber-400 text-base"></iconify-icon>
+            </div>
+            <p class="text-zinc-300 leading-relaxed ko text-base">
+              "처음에는 반신반의했어요. AI가 만든 시안이 이렇게 퀄리티가 좋을 거라고 생각 못했거든요. 명함을 만들었는데 주변 반응이 너무 좋아서 스티커, 포스터까지 연달아 주문했습니다. 이제 디자이너 외주 맡길 일이 없어졌어요."
+            </p>
+          </div>
+          <div class="flex items-center gap-3 mt-6 pt-6 border-t border-zinc-800">
+            <img src="https://i.pravatar.cc/150?u=hayounseo" alt="" class="w-10 h-10 rounded-full object-cover" loading="lazy" decoding="async">
+            <div>
+              <div class="text-white text-sm font-semibold ko">하윤서</div>
+              <div class="text-zinc-500 text-xs ko">스텔라랩스 마케팅 팀장</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Short review 1 -->
+        <div class="glass-card rounded-3xl p-7 reveal" style="transition-delay: 100ms">
+          <div class="flex gap-1 mb-4">
+            <iconify-icon icon="solar:star-bold" class="text-amber-400 text-sm"></iconify-icon>
+            <iconify-icon icon="solar:star-bold" class="text-amber-400 text-sm"></iconify-icon>
+            <iconify-icon icon="solar:star-bold" class="text-amber-400 text-sm"></iconify-icon>
+            <iconify-icon icon="solar:star-bold" class="text-amber-400 text-sm"></iconify-icon>
+            <iconify-icon icon="solar:star-bold" class="text-amber-400 text-sm"></iconify-icon>
+          </div>
+          <p class="text-zinc-300 leading-relaxed ko text-sm">"행사 D-3에 급하게 굿즈가 필요했는데 정말 빠르게 받았어요. 품질도 기대 이상."</p>
+          <div class="flex items-center gap-3 mt-5 pt-5 border-t border-zinc-800">
+            <img src="https://i.pravatar.cc/150?u=parkdohyun" alt="" class="w-9 h-9 rounded-full object-cover" loading="lazy" decoding="async">
+            <div>
+              <div class="text-white text-sm font-semibold ko">박도현</div>
+              <div class="text-zinc-500 text-xs ko">위브스튜디오 대표</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Short review 2 -->
+        <div class="glass-card rounded-3xl p-7 reveal" style="transition-delay: 150ms">
+          <div class="flex gap-1 mb-4">
+            <iconify-icon icon="solar:star-bold" class="text-amber-400 text-sm"></iconify-icon>
+            <iconify-icon icon="solar:star-bold" class="text-amber-400 text-sm"></iconify-icon>
+            <iconify-icon icon="solar:star-bold" class="text-amber-400 text-sm"></iconify-icon>
+            <iconify-icon icon="solar:star-bold" class="text-amber-400 text-sm"></iconify-icon>
+            <iconify-icon icon="solar:star-bold" class="text-amber-400 text-sm"></iconify-icon>
+          </div>
+          <p class="text-zinc-300 leading-relaxed ko text-sm">"굿즈 플랫폼을 여러 개 써봤는데 AI 자동 시안 기능은 GOODZZ가 압도적으로 좋습니다."</p>
+          <div class="flex items-center gap-3 mt-5 pt-5 border-t border-zinc-800">
+            <img src="https://i.pravatar.cc/150?u=leeseojinh" alt="" class="w-9 h-9 rounded-full object-cover" loading="lazy" decoding="async">
+            <div>
+              <div class="text-white text-sm font-semibold ko">이서진</div>
+              <div class="text-zinc-500 text-xs ko">루미너스 디자인팀</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Short review 3 -->
+        <div class="glass-card rounded-3xl p-7 reveal" style="transition-delay: 200ms">
+          <div class="flex gap-1 mb-4">
+            <iconify-icon icon="solar:star-bold" class="text-amber-400 text-sm"></iconify-icon>
+            <iconify-icon icon="solar:star-bold" class="text-amber-400 text-sm"></iconify-icon>
+            <iconify-icon icon="solar:star-bold" class="text-amber-400 text-sm"></iconify-icon>
+            <iconify-icon icon="solar:star-bold" class="text-amber-400 text-sm"></iconify-icon>
+            <iconify-icon icon="solar:star-bold" class="text-amber-400 text-sm"></iconify-icon>
+          </div>
+          <p class="text-zinc-300 leading-relaxed ko text-sm">"해외 팬들에게 굿즈를 보내야 했는데 국제 배송까지 한 번에 해결됐어요. 포장도 깔끔하고 품질에 매우 만족합니다."</p>
+          <div class="flex items-center gap-3 mt-5 pt-5 border-t border-zinc-800">
+            <img src="https://i.pravatar.cc/150?u=kimjunwoo22" alt="" class="w-9 h-9 rounded-full object-cover" loading="lazy" decoding="async">
+            <div>
+              <div class="text-white text-sm font-semibold ko">김준우</div>
+              <div class="text-zinc-500 text-xs ko">개인 셀러 / 아이돌 굿즈 제작</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ CTA ═══════════════ -->
+  <section class="py-32 border-t border-zinc-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="reveal relative overflow-hidden rounded-3xl glass-card p-12 sm:p-20 text-center"
+           style="background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(245,158,11,0.15) 0%, transparent 60%);">
+        <div class="relative z-10">
+          <p class="text-amber-400 text-sm font-semibold uppercase tracking-widest mb-6 ko">지금 시작하세요</p>
+          <h2 class="font-display font-black text-4xl sm:text-5xl lg:text-6xl text-white leading-tight ko mb-6">
+            첫 굿즈가<br>기다리고 있습니다.
+          </h2>
+          <p class="text-zinc-400 text-lg max-w-[45ch] mx-auto leading-relaxed ko mb-10">
+            회원가입은 30초면 됩니다. 사진 한 장으로 지금 바로 나만의 굿즈를 만들어보세요.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <a href="/create" class="cta-btn flex items-center gap-3 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xl px-10 py-5 rounded-2xl min-h-[64px] ko">
+              <iconify-icon icon="solar:magic-stick-3-bold" class="text-2xl"></iconify-icon>
+              무료로 시작하기
+            </a>
+          </div>
+          <div class="flex flex-wrap justify-center gap-6 mt-10">
+            <div class="flex items-center gap-2 text-zinc-500 text-sm ko">
+              <iconify-icon icon="solar:check-circle-bold" class="text-amber-500 text-base"></iconify-icon>
+              신용카드 불필요
+            </div>
+            <div class="flex items-center gap-2 text-zinc-500 text-sm ko">
+              <iconify-icon icon="solar:check-circle-bold" class="text-amber-500 text-base"></iconify-icon>
+              첫 주문 무료 배송
+            </div>
+            <div class="flex items-center gap-2 text-zinc-500 text-sm ko">
+              <iconify-icon icon="solar:check-circle-bold" class="text-amber-500 text-base"></iconify-icon>
+              30일 품질 보증
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ FOOTER ═══════════════ -->
+  <footer class="border-t border-zinc-900 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 bg-amber-500 rounded-lg flex items-center justify-center">
+            <iconify-icon icon="solar:gift-bold" class="text-zinc-950 text-sm"></iconify-icon>
+          </div>
+          <span class="font-display font-bold text-lg text-white">GOODZZ</span>
+        </div>
+        <nav class="flex flex-wrap gap-6 text-sm text-zinc-500">
+          <a href="/shop" class="hover:text-white transition-colors ko">상품</a>
+          <a href="/create" class="hover:text-white transition-colors ko">굿즈 만들기</a>
+          <a href="/terms" class="hover:text-white transition-colors ko">이용약관</a>
+          <a href="/privacy" class="hover:text-white transition-colors ko">개인정보처리방침</a>
+          <a href="/refund" class="hover:text-white transition-colors ko">환불정책</a>
+        </nav>
+        <p class="text-zinc-600 text-xs ko">© 2025 GOODZZ. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ═══════════════ STICKY BOTTOM CTA ═══════════════ -->
+  <div id="sticky-cta" class="fixed bottom-0 left-0 right-0 z-40 p-4 sm:hidden" style="opacity:0; transform: translateY(100%); transition: all 0.5s cubic-bezier(0.16,1,0.3,1);">
+    <a href="/create" class="flex items-center justify-center gap-2 bg-amber-500 text-zinc-950 font-bold text-base px-6 py-4 rounded-2xl w-full min-h-[56px] shadow-lg shadow-amber-500/20 ko">
+      <iconify-icon icon="solar:magic-stick-3-bold"></iconify-icon>
+      굿즈 만들러 가기
+    </a>
+  </div>
+
+  <!-- ═══════════════ SCRIPTS ═══════════════ -->
+  <script>
+    // Scroll-based reveal using IntersectionObserver
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+    reveals.forEach(el => observer.observe(el));
+
+    // Sticky bottom CTA - show after scrolling past hero
+    const stickyCta = document.getElementById('sticky-cta');
+    const heroSection = document.querySelector('section');
+    const stickyObserver = new IntersectionObserver((entries) => {
+      if (!entries[0].isIntersecting) {
+        stickyCta.style.opacity = '1';
+        stickyCta.style.transform = 'translateY(0)';
+      } else {
+        stickyCta.style.opacity = '0';
+        stickyCta.style.transform = 'translateY(100%)';
+      }
+    }, { threshold: 0.1 });
+    stickyObserver.observe(heroSection);
+  </script>
+</body>
+</html>
