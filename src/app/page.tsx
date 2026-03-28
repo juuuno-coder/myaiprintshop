@@ -6,6 +6,7 @@ import LandingHowItWorks from '@/components/landing/LandingHowItWorks';
 import LandingTestimonials from '@/components/landing/LandingTestimonials';
 import LandingCTA from '@/components/landing/LandingCTA';
 import LandingFooter from '@/components/landing/LandingFooter';
+import VibersBanner from '@/components/VibersBanner';
 
 export const metadata = {
   title: 'GOODZZ | 사진 한 장으로 나만의 굿즈를',
@@ -40,6 +41,9 @@ export default function Home() {
       <LandingHowItWorks />
       <LandingTestimonials />
       <LandingCTA />
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 0' }}>
+        <VibersBanner size="leaderboard" currentProject="goodzz" />
+      </div>
       <LandingFooter />
     </main>
   );
