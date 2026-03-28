@@ -7,27 +7,25 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://goodzz.co.kr'),
   title: {
-    default: "GOODZZ - 내 브랜드 굿즈, AI로 뚝딱",
+    default: "GOODZZ | 사진 한 장으로 시작되는 프리미엄 글로벌 굿즈",
     template: "%s | GOODZZ",
   },
-  description: "디자이너 없이, 소량으로, 내 브랜드 굿즈를 만드세요. AI가 디자인하고, GOODZZ가 만들어드립니다.",
-  keywords: ["AI 디자인", "커스텀 굿즈", "프린트샵", "명함 제작", "스티커 제작", "티셔츠 제작", "에코백", "AI 프린트", "GOODZZ", "굿즈 제작"],
+  description: "복잡한 디자인 없이, 당신의 사진 한 장으로 전 세계 어디든 프리미엄 굿즈를 배송합니다. AI 자동 시안 합성 기술로 완성되는 나만의 브랜드.",
+  keywords: ["프리미엄 굿즈", "AI 굿즈 제작", "글로벌 굿즈 배송", "사진 굿즈", "GOODZZ", "나노바나나", "커스텀 디자인"],
   openGraph: {
     type: "website",
     locale: "ko_KR",
     url: "/",
     siteName: "GOODZZ",
-    title: "GOODZZ - 내 브랜드 굿즈, AI로 뚝딱",
-    description: "디자이너 없이, 소량으로, 내 브랜드 굿즈를 만드세요. AI가 디자인하고, GOODZZ가 만들어드립니다.",
+    title: "GOODZZ | 사진 한 장으로 시작되는 프리미엄 글로벌 굿즈",
+    description: "가장 쉬운 글로벌 굿즈 커스텀 플랫폼. 지금 사진을 업로드하고 나만의 굿즈 시안을 확인하세요.",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "GOODZZ" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "GOODZZ - 내 브랜드 굿즈, AI로 뚝딱",
-    description: "디자이너 없이, 소량으로, 내 브랜드 굿즈를 만드세요. AI가 디자인하고, GOODZZ가 만들어드립니다.",
-  },
-  robots: {
-    index: true,
-    follow: true,
+    title: "GOODZZ | 사진 한 장으로 시작되는 프리미엄 글로벌 굿즈",
+    description: "가장 쉬운 글로벌 굿즈 커스텀 플랫폼. 지금 사진을 업로드하고 나만의 굿즈 시안을 확인하세요.",
+    images: ["/og-image.png"],
   },
 };
 
@@ -43,13 +41,16 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet" />
         <link
           rel="stylesheet"
           type="text/css"
           href="https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/NanumSquareRound.woff"
         />
       </head>
-      <body className="antialiased">
+      <body className="antialiased selection:bg-primary-100 selection:text-primary-900">
         <AuthProvider>
           <CartSync />
           {children}
