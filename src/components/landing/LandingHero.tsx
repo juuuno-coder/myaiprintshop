@@ -122,7 +122,7 @@ export default function LandingHero() {
               >
                 <div className="rounded-2xl overflow-hidden mb-5 bg-gray-50 border border-gray-100" style={{ aspectRatio: '1/1' }}>
                   <Image
-                    src="https://images.unsplash.com/photo-1597484661643-2f5fef640dd1?auto=format&fit=crop&q=80&w=800"
+                    src="/images/hero-premium.png"
                     alt="굿즈 미리보기"
                     fill
                     className="w-full h-full object-cover mix-blend-multiply"

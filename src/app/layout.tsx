@@ -28,6 +28,10 @@ export const metadata: Metadata = {
     description: "가장 쉬운 글로벌 굿즈 커스텀 플랫폼. 지금 사진을 업로드하고 나만의 굿즈 시안을 확인하세요.",
     images: ["/og-image.png"],
   },
+  icons: {
+    icon: [{ url: "/favicon.png", type: "image/png" }],
+    apple: [{ url: "/apple-touch-icon.png" }],
+  },
 };
 
 import { Toaster } from 'sonner';

@@ -20,3 +20,29 @@
 
 ## 기존 기술 스택/파일 구조/개발 규칙은 유지
 (Next.js 16, Firebase, PortOne, Gemini AI, Fabric.js, Tailwind CSS 등)
+
+
+## 세션로그 기록 (필수)
+- 모든 개발 대화의 주요 내용을 `session-logs/` 폴더에 기록할 것
+- 파일명: `YYYY-MM-DD_한글제목.md` / 내용: 한글
+- 세션 종료 시, 마일스톤 달성 시, **컨텍스트 압축 전**에 반드시 저장
+- 상세 포맷은 상위 CLAUDE.md 참조
+
+---
+
+## 파일 스토리지 — NCP Object Storage ⚠️
+
+> **`src/lib/s3-client.ts` 직접 수정 금지. 레거시 파일임.**
+> **로컬 MinIO(docker-compose)는 개발 테스트 전용. 실제 업로드는 NCP wero-bucket으로.**
+
+- 버킷: `wero-bucket` (NCP Object Storage)
+- 환경변수: `NCP_ACCESS_KEY`, `NCP_SECRET_KEY`, `NCP_BUCKET_NAME=wero-bucket`
+- 전체 가이드: `packages/storage/NCP_STORAGE_GUIDE.md`
+
+```ts
+// 서버 사이드 (API Route):
+import { getPresignedUploadUrl, uploadBuffer } from '@vibers/storage/server';
+
+// 클라이언트 사이드:
+import { uploadFile } from '@vibers/storage/client';
+```

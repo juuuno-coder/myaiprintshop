@@ -14,7 +14,19 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.vibers.goodzz"
+      "bundleIdentifier": "com.vibers.goodzz",
+      "infoPlist": {
+        "LSApplicationQueriesSchemes": [
+          "naverlogin"
+        ],
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": [
+              "navergoodzz"
+            ]
+          }
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -32,7 +44,21 @@
       "expo-router",
       "expo-secure-store",
       "expo-font",
-      "expo-asset"
-    ]
+      "expo-asset",
+      [
+        "@react-native-kakao/core",
+        {
+          "nativeAppKey": "63c5300b5fc16b2c9e7919d015aa06a9"
+        }
+      ],
+      "./plugins/withXcode26Fix"
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "946eb8af-e826-48b8-aa51-058eceda2ce3"
+      }
+    },
+    "owner": "juuuno1116"
   }
 }
