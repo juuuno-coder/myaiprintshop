@@ -15,7 +15,9 @@
     "seed:reviews": "tsx scripts/seed-reviews.ts",
     "seed:crawl": "tsx scripts/seed-products-from-crawl.ts",
     "seed:mock100": "tsx scripts/seed-mock-100.ts",
-    "migrate:vendors": "tsx scripts/migrate-vendors.ts"
+    "migrate:vendors": "tsx scripts/migrate-vendors.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@vibers/storage": "*",
@@ -59,6 +61,7 @@
     "tailwindcss": "^4",
     "tsx": "^4.19.2",
     "typescript": "^5",
+    "@playwright/test": "^1.52.0",
     "vitest": "^3.0.0"
   }
 }

@@ -85,9 +85,19 @@ export async function POST(request: NextRequest) {
     let paymentVerified = false;
     let paymentData: PaymentResponse | null = null;
 
-    if (PORTONE_CONFIG.apiSecret && !paymentId.startsWith('test-')) {
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    if (isProduction && !PORTONE_CONFIG.apiSecret) {
+      console.error('PORTONE_API_SECRET is not configured in production');
+      return NextResponse.json(
+        { error: '결제 시스템 설정 오류입니다.' },
+        { status: 500 }
+      );
+    }
+
+    if (PORTONE_CONFIG.apiSecret) {
       paymentData = await verifyPaymentWithPortone(paymentId);
-      
+
       if (!paymentData) {
         return NextResponse.json(
           { error: '결제 정보를 확인할 수 없습니다.' },
@@ -108,8 +118,8 @@ export async function POST(request: NextRequest) {
       }
 
       paymentVerified = paymentData.status === 'PAID';
-    } else {
-      // 테스트 모드 또는 API Secret 미설정 시: 결제 성공으로 간주 (개발용)
+    } else if (!isProduction) {
+      // 개발 환경에서만 테스트 모드 허용
       console.log('⚠️ Development mode: Skipping actual payment verification');
       paymentVerified = true;
       paymentData = {

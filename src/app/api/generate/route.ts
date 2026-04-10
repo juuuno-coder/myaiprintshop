@@ -1,5 +1,43 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+
+// 인메모리 레이트 리밋 (IP당 분당 5회, 시간당 30회)
+const rateLimitMap = new Map<string, { minute: number[]; hour: number[] }>();
+
+function checkRateLimit(ip: string): { allowed: boolean; retryAfter?: number } {
+  const now = Date.now();
+  const oneMinuteAgo = now - 60_000;
+  const oneHourAgo = now - 3_600_000;
+
+  let record = rateLimitMap.get(ip);
+  if (!record) {
+    record = { minute: [], hour: [] };
+    rateLimitMap.set(ip, record);
+  }
+
+  // 오래된 기록 정리
+  // 오래된 엔트리 정리 (Map이 커지면 전체 정리)
+  if (rateLimitMap.size > 1000) {
+    for (const [key, r] of rateLimitMap) {
+      r.hour = r.hour.filter(t => t > oneHourAgo);
+      if (r.hour.length === 0) rateLimitMap.delete(key);
+    }
+  }
+
+  record.minute = record.minute.filter(t => t > oneMinuteAgo);
+  record.hour = record.hour.filter(t => t > oneHourAgo);
+
+  if (record.minute.length >= 5) {
+    return { allowed: false, retryAfter: Math.ceil((record.minute[0] + 60_000 - now) / 1000) };
+  }
+  if (record.hour.length >= 30) {
+    return { allowed: false, retryAfter: Math.ceil((record.hour[0] + 3_600_000 - now) / 1000) };
+  }
+
+  record.minute.push(now);
+  record.hour.push(now);
+  return { allowed: true };
+}
 
 // Mock images for final fallback
 const MOCK_IMAGES = [
@@ -23,8 +61,18 @@ async function generateWithPollinations(prompt: string): Promise<string> {
  * Uses Gemini 1.5 Flash for Prompt Engineering
  * and uses Imagen 3 via Gemini API (Google AI Studio) for image generation.
  */
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    // 레이트 리밋 체크
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    const rateCheck = checkRateLimit(ip);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
+        { status: 429, headers: { 'Retry-After': String(rateCheck.retryAfter || 60) } }
+      );
+    }
+
     const { prompt, style, removeBackground } = await req.json();
     const apiKey = process.env.GOOGLE_API_KEY;
 

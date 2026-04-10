@@ -53,6 +53,7 @@ export interface WowPressOrderStatusResponse {
 export class WowPressClient {
   private apiKey: string;
   private baseUrl: string;
+  private readonly timeout = 15_000; // 15초 타임아웃
 
   constructor() {
     if (!WOWPRESS_API_KEY) {
@@ -61,6 +62,10 @@ export class WowPressClient {
 
     this.apiKey = WOWPRESS_API_KEY || '';
     this.baseUrl = WOWPRESS_API_BASE;
+  }
+
+  private fetchWithTimeout(url: string, options: RequestInit): Promise<Response> {
+    return fetch(url, { ...options, signal: AbortSignal.timeout(this.timeout) });
   }
 
   /**
@@ -77,7 +82,7 @@ export class WowPressClient {
     console.log(`🔍 Fetching WowPress product: ${prodno}`);
 
     try {
-      const response = await fetch(url, {
+      const response = await this.fetchWithTimeout(url, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${this.apiKey}`,
@@ -87,7 +92,7 @@ export class WowPressClient {
         next: {
           revalidate: 3600,
         },
-      });
+      } as RequestInit);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -121,7 +126,7 @@ export class WowPressClient {
     console.log('📤 Submitting order to WowPress...');
 
     try {
-      const response = await fetch(url, {
+      const response = await this.fetchWithTimeout(url, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${this.apiKey}`,
@@ -172,7 +177,7 @@ export class WowPressClient {
     console.log(`🔍 Checking WowPress order status: ${orderno}`);
 
     try {
-      const response = await fetch(url, {
+      const response = await this.fetchWithTimeout(url, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${this.apiKey}`,
@@ -215,10 +220,16 @@ export class WowPressClient {
 
     for (let i = 0; i < prodnos.length; i += batchSize) {
       const batch = prodnos.slice(i, i + batchSize);
-      const batchResults = await Promise.all(
+      const batchResults = await Promise.allSettled(
         batch.map((prodno) => this.getProduct(prodno))
       );
-      results.push(...batchResults);
+      for (const result of batchResults) {
+        if (result.status === 'fulfilled') {
+          results.push(result.value);
+        } else {
+          console.error('❌ Batch product fetch failed:', result.reason);
+        }
+      }
     }
 
     console.log(`✅ Batch fetch completed: ${results.length} products`);
