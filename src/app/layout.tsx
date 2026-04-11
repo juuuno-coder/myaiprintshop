@@ -68,7 +68,7 @@ export default function RootLayout({
                 "url": "https://vibers.co.kr"
               },
               "inLanguage": "ko"
-            })
+            }).replace(/</g, '\\u003c')
           }}
         />
         <Script

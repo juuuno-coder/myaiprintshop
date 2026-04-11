@@ -6,6 +6,9 @@ import { getAllVendors } from '@/lib/vendors';
 import { forwardOrderToWowPress } from '@/lib/wowpress/order-forwarder';
 import { sendOrderConfirmEmail } from '@/lib/email';
 
+// 멱등성 보호: 처리 중인 orderId 추적
+const processingOrders = new Set<string>();
+
 // 포트원 V2 API로 결제 검증
 async function verifyPaymentWithPortone(paymentId: string): Promise<PaymentResponse | null> {
   try {
@@ -64,6 +67,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 멱등성: 동일 orderId 동시 처리 방지
+    if (processingOrders.has(orderId)) {
+      return NextResponse.json(
+        { error: '해당 주문이 처리 중입니다. 잠시 후 다시 시도해주세요.' },
+        { status: 409 }
+      );
+    }
+    processingOrders.add(orderId);
+
+    try {
     // DB에서 주문 조회
     const order = await getOrderById(orderId);
     if (!order) {
@@ -207,6 +220,10 @@ export async function POST(request: NextRequest) {
       order: updatedOrder,
       payment: paymentData,
     });
+
+    } finally {
+      processingOrders.delete(orderId);
+    }
 
   } catch (error) {
     console.error('Payment verification error:', error);

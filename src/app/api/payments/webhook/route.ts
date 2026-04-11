@@ -6,6 +6,23 @@ import { PORTONE_CONFIG } from '@/lib/payment';
 
 const WEBHOOK_SECRET = process.env.PORTONE_WEBHOOK_SECRET || '';
 
+// 리플레이 방지: 처리된 msgId를 TTL 캐시로 추적 (10분)
+const processedWebhooks = new Map<string, number>();
+const REPLAY_TTL = 10 * 60_000;
+
+function isReplay(msgId: string): boolean {
+  const now = Date.now();
+  // 오래된 엔트리 정리
+  if (processedWebhooks.size > 200) {
+    for (const [id, ts] of processedWebhooks) {
+      if (now - ts > REPLAY_TTL) processedWebhooks.delete(id);
+    }
+  }
+  if (processedWebhooks.has(msgId)) return true;
+  processedWebhooks.set(msgId, now);
+  return false;
+}
+
 /**
  * Standard Webhooks 서명 검증 (PortOne V2)
  * https://developers.portone.io/opi/ko/integration/webhook/readme-v2
@@ -70,6 +87,13 @@ export async function POST(req: NextRequest) {
     // 1. 서명 검증
     if (!verifyWebhookSignature(body, req.headers)) {
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+    }
+
+    // 1.5 리플레이 방지
+    const msgId = req.headers.get('webhook-id');
+    if (msgId && isReplay(msgId)) {
+      console.log(`[Webhook] Duplicate msgId ignored: ${msgId}`);
+      return NextResponse.json({ success: true, message: 'Already processed' });
     }
 
     // 2. V2 페이로드 파싱
