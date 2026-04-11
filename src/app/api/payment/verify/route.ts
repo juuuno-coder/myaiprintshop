@@ -4,6 +4,7 @@ import { getOrderById, updateOrder } from '@/lib/orders';
 import { batchTransferToVendors } from '@/lib/portone-settlement';
 import { getAllVendors } from '@/lib/vendors';
 import { forwardOrderToWowPress } from '@/lib/wowpress/order-forwarder';
+import { sendOrderConfirmEmail } from '@/lib/email';
 
 // 포트원 V2 API로 결제 검증
 async function verifyPaymentWithPortone(paymentId: string): Promise<PaymentResponse | null> {
@@ -154,6 +155,21 @@ export async function POST(request: NextRequest) {
 
     console.log(`✅ Order ${orderId} payment verified and saved to DB`);
 
+    // 구매자에게 주문 확인 이메일 발송 (비차단)
+    if (updatedOrder?.shippingInfo?.email) {
+      sendOrderConfirmEmail(updatedOrder.shippingInfo.email, {
+        customerName: updatedOrder.shippingInfo.name,
+        orderId,
+        items: updatedOrder.items.map((item: any) => ({
+          name: item.productName || item.name,
+          quantity: item.quantity,
+          price: item.price * item.quantity,
+        })),
+        totalAmount: updatedOrder.totalAmount,
+        shippingFee: updatedOrder.shippingFee,
+      }).catch((err: any) => console.error('❌ Order confirm email failed:', err));
+    }
+
     // Phase 5: 배분정산 실행
     if (updatedOrder?.vendorOrders && updatedOrder.vendorOrders.length > 0) {
       try {
@@ -169,9 +185,6 @@ export async function POST(request: NextRequest) {
         );
 
         console.log(`✅ Settlement completed for ${settlementResults.size} vendors`);
-
-        // TODO: 판매자에게 이메일 알림 발송
-        // await sendVendorNotifications(updatedOrder.vendorOrders, vendorsMap);
       } catch (error) {
         console.error('❌ Settlement error (order still completed):', error);
         // 정산 실패해도 주문은 완료됨 (정산은 나중에 재시도 가능)
