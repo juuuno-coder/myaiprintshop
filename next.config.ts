@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // _global-error 프리렌더 에러 방지 (vercel/next.js#86178)
+    prerenderEarlyExit: false,
+  },
   /* Server External Packages */
   serverExternalPackages: ['firebase-admin'],
 
