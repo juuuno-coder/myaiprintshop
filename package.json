@@ -20,7 +20,6 @@
     "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
-    "@vibers/storage": "*",
     "@aws-sdk/client-s3": "^3.714.0",
     "@aws-sdk/s3-request-presigner": "^3.714.0",
     "@google/generative-ai": "^0.24.1",

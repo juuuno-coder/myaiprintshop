@@ -1,13 +1,21 @@
 /**
- * ⚠️ 이 파일은 @vibers/storage 패키지로 통합되었습니다 (2026-03-31)
+ * NCP Object Storage S3 호환 클라이언트
  *
- * 직접 수정하지 마세요. packages/storage/src/server.ts 를 수정하세요.
  * 버킷: wero-bucket (NCP Object Storage)
  * 환경변수: NCP_ACCESS_KEY, NCP_SECRET_KEY, NCP_BUCKET_NAME=wero-bucket
- *
- * 로컬 MinIO 개발 환경은 docker-compose.yml의 minio 컨테이너만 사용 (이 파일과 무관)
  */
+import { S3Client } from '@aws-sdk/client-s3';
 
-// 하위 호환성 유지 — 기존 코드가 s3Client, S3_BUCKET을 import하면 NCP 클라이언트로 연결
-export { ncpClient as s3Client } from '@vibers/storage/server';
-export { NCP_BUCKET as S3_BUCKET } from '@vibers/storage/server';
+const NCP_ENDPOINT = 'https://kr.object.ncloudstorage.com';
+
+export const s3Client = new S3Client({
+  region: 'kr-standard',
+  endpoint: NCP_ENDPOINT,
+  credentials: {
+    accessKeyId: process.env.NCP_ACCESS_KEY || '',
+    secretAccessKey: process.env.NCP_SECRET_KEY || '',
+  },
+  forcePathStyle: true,
+});
+
+export const S3_BUCKET = process.env.NCP_BUCKET_NAME || 'wero-bucket';
