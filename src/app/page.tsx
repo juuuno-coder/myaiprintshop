@@ -4,6 +4,7 @@ import LandingTrustStrip from '@/components/landing/LandingTrustStrip';
 import LandingFeatures from '@/components/landing/LandingFeatures';
 import LandingHowItWorks from '@/components/landing/LandingHowItWorks';
 import LandingTestimonials from '@/components/landing/LandingTestimonials';
+import LandingBrands from '@/components/landing/LandingBrands';
 import LandingCTA from '@/components/landing/LandingCTA';
 import LandingFooter from '@/components/landing/LandingFooter';
 import VibersBanner from '@/components/VibersBanner';
@@ -40,6 +41,7 @@ export default function Home() {
       <LandingFeatures />
       <LandingHowItWorks />
       <LandingTestimonials />
+      <LandingBrands />
       <LandingCTA />
       <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 0' }}>
         <VibersBanner size="leaderboard" currentProject="goodzz" />

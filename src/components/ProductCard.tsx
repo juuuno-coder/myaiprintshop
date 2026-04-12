@@ -100,8 +100,15 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
         </div>
 
         <div className="px-2 pb-2">
-          <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">
-            {product.category}
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
+              {product.category}
+            </span>
+            {(product as any).vendorName && (product as any).vendorType === 'marketplace' && (
+              <span className="text-[10px] font-semibold text-purple-500 truncate max-w-[100px]">
+                {(product as any).vendorName}
+              </span>
+            )}
           </div>
           <h3 className="font-bold text-gray-900 line-clamp-2 mb-2 leading-snug tracking-tight text-sm group-hover:text-black transition-colors" style={{ wordBreak: 'keep-all' }}>
             {product.name}

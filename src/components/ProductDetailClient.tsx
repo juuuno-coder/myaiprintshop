@@ -309,6 +309,14 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           <p className="text-gray-500 text-sm leading-relaxed max-w-lg">
             {product.description || '최고급 소재와 AI 기술이 만나 탄생한 커스텀 제품입니다. 세상에 단 하나뿐인 디자인을 지금 바로 완성해보세요.'}
           </p>
+          {product.vendorName && product.vendorType === 'marketplace' && (
+            <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-purple-50 border border-purple-100 rounded-full">
+              <span className="w-5 h-5 rounded-full bg-purple-500 text-white text-[10px] font-bold flex items-center justify-center">
+                {product.vendorName.charAt(0)}
+              </span>
+              <span className="text-xs font-semibold text-purple-700">{product.vendorName}</span>
+            </div>
+          )}
         </div>
 
         {/* Volume Pricing Table */}
