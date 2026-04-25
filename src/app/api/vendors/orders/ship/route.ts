@@ -73,8 +73,8 @@ export async function POST(request: NextRequest) {
       createNotification({
         userId: order.userId,
         type: 'order_status',
-        title: '상품이 발송되었습니다',
-        message: `${vendorName} | ${carrier || '택배'} ${trackingNumber}`,
+        title: '상품이 출발했어요 🚚',
+        message: `${vendorName}에서 보낸 택배예요 — ${carrier || '택배'} ${trackingNumber}`,
         link: `/mypage/orders/${orderId}`,
       }).catch(() => {});
     }

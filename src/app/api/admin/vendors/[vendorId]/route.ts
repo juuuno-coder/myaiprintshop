@@ -54,8 +54,8 @@ export async function PATCH(
         createNotification({
           userId: vendor.ownerId,
           type: 'vendor',
-          title: '판매자 신청이 승인되었습니다! 🎉',
-          message: `${vendor.businessName} 스토어를 오픈하세요`,
+          title: '축하해요! 판매자 승인이 완료됐어요 🎉',
+          message: `${vendor.businessName} 스토어를 지금 바로 오픈할 수 있어요 — 상품을 등록해보세요`,
           link: '/mypage/vendor',
         }).catch(() => {});
         break;
@@ -67,8 +67,8 @@ export async function PATCH(
         createNotification({
           userId: vendor.ownerId,
           type: 'vendor',
-          title: '판매자 신청이 반려되었습니다',
-          message: '자세한 내용은 이메일을 확인해주세요',
+          title: '판매자 신청이 반려됐어요',
+          message: '아쉽지만 이번에는 승인되지 않았어요 — 자세한 사유는 이메일을 확인해주세요',
           link: '/mypage/vendor/apply',
         }).catch(() => {});
         break;
@@ -80,8 +80,8 @@ export async function PATCH(
         createNotification({
           userId: vendor.ownerId,
           type: 'vendor',
-          title: '스토어가 일시 정지되었습니다',
-          message: '자세한 내용은 이메일을 확인해주세요',
+          title: '스토어가 일시 정지됐어요',
+          message: '운영 정책 확인이 필요해요 — 자세한 내용은 이메일을 확인해주세요',
         }).catch(() => {});
         break;
 

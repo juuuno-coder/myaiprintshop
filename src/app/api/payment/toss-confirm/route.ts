@@ -111,8 +111,8 @@ export async function POST(request: NextRequest) {
         createNotification({
           userId: updatedOrder.userId,
           type: 'order_status',
-          title: '주문이 완료되었습니다',
-          message: itemCount > 1 ? `${itemName} 외 ${itemCount - 1}건` : itemName,
+          title: '결제가 완료됐어요 ✨',
+          message: `${itemCount > 1 ? `${itemName} 외 ${itemCount - 1}건` : itemName} — 제작이 시작되면 다시 알려드릴게요`,
           link: `/mypage/orders/${orderId}`,
         }).catch(() => {});
       }
@@ -145,8 +145,8 @@ export async function POST(request: NextRequest) {
               createNotification({
                 userId: vendor.ownerId,
                 type: 'order_status',
-                title: '새 주문이 접수되었습니다',
-                message: `${vo.items.map((i: any) => i.productName || i.name).join(', ')} | ₩${vo.subtotal.toLocaleString()}`,
+                title: '새 주문이 들어왔어요 📦',
+                message: `${vo.items.map((i: any) => i.productName || i.name).join(', ')} | ₩${vo.subtotal.toLocaleString()} — 주문 관리에서 확인해주세요`,
                 link: '/mypage/vendor/orders',
               }).catch(() => {});
             }

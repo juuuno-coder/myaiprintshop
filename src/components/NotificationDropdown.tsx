@@ -99,16 +99,18 @@ export default function NotificationDropdown() {
           <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
             <h3 className="font-bold text-sm text-gray-900">알림</h3>
             {unreadCount > 0 && (
-              <span className="text-xs text-emerald-600 font-medium">
-                {unreadCount}개 읽지 않음
+              <span className="text-xs text-purple-600 font-bold bg-purple-50 px-2 py-0.5 rounded-full">
+                {unreadCount}개 새 소식
               </span>
             )}
           </div>
 
-          <div className="max-h-80 overflow-y-auto">
+          <div className="max-h-96 overflow-y-auto">
             {notifications.length === 0 ? (
-              <div className="px-4 py-8 text-center text-sm text-gray-400">
-                알림이 없습니다
+              <div className="px-4 py-12 text-center">
+                <span className="text-3xl mb-2 block">🔔</span>
+                <p className="text-sm text-gray-500 font-medium">아직 알림이 없어요</p>
+                <p className="text-xs text-gray-400 mt-1">주문하시면 진행 상황을 알려드릴게요</p>
               </div>
             ) : (
               notifications.map((notification) => {

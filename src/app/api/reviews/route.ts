@@ -65,8 +65,8 @@ export async function PATCH(request: NextRequest) {
         createNotification({
           userId: reviewData.userId,
           type: 'review',
-          title: '리뷰에 사장님 답변이 달렸습니다',
-          message: replyContent.slice(0, 50),
+          title: '내 리뷰에 사장님이 답변했어요 ⭐',
+          message: `"${replyContent.slice(0, 40)}..." — 확인해보세요`,
           link: `/shop/${reviewData.productId}`,
         }).catch(() => {});
       }
