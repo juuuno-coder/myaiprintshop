@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import React from 'react';
 import { useState, useEffect } from 'react';
 import styles from './admin.module.css';

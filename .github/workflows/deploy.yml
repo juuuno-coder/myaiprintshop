@@ -1,0 +1,66 @@
+name: Deploy goodzz to NCP
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: deploy-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+
+      - name: Deploy to NCP via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.NCP_HOST }}
+          username: ${{ secrets.NCP_USER }}
+          key: ${{ secrets.NCP_SSH_KEY }}
+          timeout: 25m
+          command_timeout: 20m
+          script: |
+            set -e
+            cd /root/projects/goodzz/repo
+
+            echo "=== git pull ==="
+            git fetch --depth=1 origin main && git reset --hard FETCH_HEAD
+
+            echo "=== docker build ==="
+            docker build -t goodzz:latest .
+
+            echo "=== docker compose up ==="
+            cd /root/projects/goodzz
+            docker compose up -d --wait
+
+            echo "=== nginx reload ==="
+            docker exec npm-app-1 nginx -s reload || true
+
+            echo "=== health check ==="
+            sleep 5
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:4240/)
+            echo "HTTP status: $STATUS"
+            if [ "$STATUS" != "200" ]; then
+              echo "Health check failed!"
+              docker logs goodzz --tail 50
+              exit 1
+            fi
+
+            echo "=== Deploy complete ==="
+
+      - name: Cleanup old images
+        if: success()
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.NCP_HOST }}
+          username: ${{ secrets.NCP_USER }}
+          key: ${{ secrets.NCP_SSH_KEY }}
+          script: |
+            docker builder prune -af --filter "until=24h"

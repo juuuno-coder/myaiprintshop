@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = 'force-dynamic';
+
 import React from "react";
 import Navbar from "@/components/Navbar";
 import { PlayCircle, BookOpen, User, Star, ArrowRight } from "lucide-react";

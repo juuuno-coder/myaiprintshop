@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import React, { useState, useEffect } from 'react';
 import { Ticket, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';

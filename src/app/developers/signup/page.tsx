@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import { useState } from 'react';
 import { Key, Mail, User, CheckCircle2, Copy, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';

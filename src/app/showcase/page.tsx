@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = 'force-dynamic';
+
 import React, { useState, useEffect, useCallback } from "react";
 import Navbar from "@/components/Navbar";
 import { Heart, MessageCircle, Share2, Filter, Zap, Eye, Download, Repeat2 } from "lucide-react";

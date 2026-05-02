@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: '이용약관 | GOODZZ',
   description: 'GOODZZ 서비스 이용약관',
