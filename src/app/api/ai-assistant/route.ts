@@ -114,7 +114,7 @@ async function executeTool(name: string, args: Record<string, any>): Promise<str
 
     case 'write_product_description': {
       const { productName, keywords, targetAudience } = args;
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
       const prompt = `다음 상품에 대한 온라인 쇼핑몰 판매 설명문을 작성해주세요.
 상품명: ${productName}
 특징: ${keywords || '없음'}
@@ -164,7 +164,7 @@ export async function POST(req: NextRequest) {
     }
 
     const model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.0-flash',
       tools,
       toolConfig: { functionCallingConfig: { mode: FunctionCallingMode.AUTO } },
       systemInstruction: SYSTEM_PROMPT + (context ? `\n\n현재 페이지 컨텍스트: ${context}` : ''),

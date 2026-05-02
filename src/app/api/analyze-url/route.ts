@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
 
     // Step 3: Gemini analysis
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
     const prompt = `
 Analyze this website and extract brand information in JSON format.
