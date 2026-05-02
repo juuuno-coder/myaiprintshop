@@ -3,7 +3,7 @@ name: Deploy goodzz to NCP
 on:
   push:
     branches:
-      - main
+      - master
 
 concurrency:
   group: deploy-${{ github.repository }}
