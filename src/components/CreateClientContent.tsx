@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import OrderModal from './common/OrderModal';
@@ -20,13 +20,22 @@ const cardStyle = {
   boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)',
 };
 
-export default function CreateClientContent({ products }: { products: Product[] }) {
+export default function CreateClientContent({ products: initialProducts }: { products: Product[] }) {
+  const [products, setProducts] = useState<Product[]>(initialProducts);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (initialProducts.length > 0) return;
+    fetch('/api/products?limit=48&isActive=true')
+      .then(r => r.json())
+      .then(d => { if (d.products?.length) setProducts(d.products); })
+      .catch(() => {});
+  }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

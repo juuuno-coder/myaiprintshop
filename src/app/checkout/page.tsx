@@ -228,9 +228,7 @@ export default function CheckoutPage() {
       const toss = (window as any).TossPayments;
 
       if (!toss) {
-        console.log('⚠️ Toss SDK not loaded, using test mode');
-        await handleTestPayment(orderId);
-        return;
+        throw new Error('결제 모듈을 불러오지 못했습니다. 페이지를 새로고침 후 다시 시도해 주세요.');
       }
 
       const tossMethod = paymentMethod === 'CARD' ? '카드'
@@ -259,15 +257,6 @@ export default function CheckoutPage() {
       toast.error(error.message || '결제 처리 중 오류가 발생했습니다.');
       setIsProcessing(false);
     }
-  };
-
-  // 테스트 결제 (포트원 SDK 없이)
-  const handleTestPayment = async (orderId: string) => {
-    const testPaymentId = `test-payment-${Date.now()}`;
-    
-    // 2초 대기 후 결제 완료 처리
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    await verifyPayment(testPaymentId, orderId);
   };
 
   // 결제 검증
@@ -496,12 +485,7 @@ export default function CheckoutPage() {
                 </button>
               </div>
               
-              {/* 테스트 모드 안내 */}
-              {!portoneLoaded && (
-                <p className="mt-4 text-sm text-amber-600 bg-amber-50 p-3 rounded-lg">
-                  ⚠️ 테스트 모드로 실행 중입니다. 실제 결제는 진행되지 않습니다.
-                </p>
-              )}
+
             </section>
 
             {/* Coupon */}

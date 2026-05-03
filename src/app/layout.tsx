@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import "./globals.css";
 
+// Prevent all pages from static prerendering (dynamic rendering on-demand)
+// Required to avoid React null module errors in shared webpack chunks during next build
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://goodzz.co.kr'),
@@ -37,6 +39,7 @@ import { Analytics } from '@vercel/analytics/next';
 import ClientProviders from '@/components/ClientProviders';
 import AIAssistantFloatWrapper from '@/components/AIAssistantFloatWrapper';
 import GlobalNavbarWrapper from '@/components/GlobalNavbarWrapper';
+import ThirdPartyScripts from '@/components/ThirdPartyScripts';
 
 export default function RootLayout({
   children,
@@ -73,24 +76,7 @@ export default function RootLayout({
             }).replace(/</g, '\\u003c')
           }}
         />
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7704550771011130"
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-CGK1BSBM63"
-          strategy="afterInteractive"
-        />
-        <Script id="gtag-init" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-CGK1BSBM63');
-          `}
-        </Script>
+        <ThirdPartyScripts />
         <ClientProviders>
           <GlobalNavbarWrapper />
           {children}
