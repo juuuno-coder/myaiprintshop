@@ -3,7 +3,6 @@
 export const dynamic = 'force-dynamic';
 
 import React, { useState, useEffect, useCallback } from "react";
-import Navbar from "@/components/Navbar";
 import { Heart, MessageCircle, Share2, Filter, Zap, Eye, Download, Repeat2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -176,7 +175,6 @@ export default function ShowcasePage() {
 
   return (
     <main className="min-h-screen bg-white">
-      <Navbar />
 
       {/* Header */}
       <section className="pt-32 pb-12 text-center px-4">

@@ -4,7 +4,6 @@ export const dynamic = 'force-dynamic';
 
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import StorePageClient from '@/components/store/StorePageClient';
 import { Loader2 } from 'lucide-react';
@@ -43,7 +42,6 @@ export default function StorePage() {
 
   return (
     <>
-      <Navbar />
       <StorePageClient vendor={data.vendor} products={data.products} />
       <Footer />
     </>

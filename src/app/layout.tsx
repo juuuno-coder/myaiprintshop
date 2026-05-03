@@ -36,6 +36,8 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Analytics } from '@vercel/analytics/next';
 import ClientProviders from '@/components/ClientProviders';
 import AIAssistantFloatWrapper from '@/components/AIAssistantFloatWrapper';
+import dynamic from 'next/dynamic';
+const GlobalNavbar = dynamic(() => import('@/components/GlobalNavbar'), { ssr: false });
 
 export default function RootLayout({
   children,
@@ -91,6 +93,7 @@ export default function RootLayout({
           `}
         </Script>
         <ClientProviders>
+          <GlobalNavbar />
           {children}
           <AIAssistantFloatWrapper />
         </ClientProviders>

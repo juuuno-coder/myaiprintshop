@@ -5,7 +5,6 @@ export const dynamic = 'force-dynamic';
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import Navbar from '@/components/Navbar';
 import { Wand2, Store, User, ArrowRight, Check, Loader2, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import type { AnalysisResult, GoodsRecommendation } from '@/lib/goods-recommendation';
@@ -183,7 +182,6 @@ export default function CreatorRegisterPage() {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      <Navbar />
       <div className="pt-24 pb-16 max-w-2xl mx-auto px-4">
         <div className="text-center mb-12">
           <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-4">

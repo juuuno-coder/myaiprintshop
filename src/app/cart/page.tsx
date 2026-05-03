@@ -7,7 +7,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useStore } from '@/store/useStore';
 import { toast } from 'sonner';
-import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
 function getVolumeDiscountedPrice(item: { price: number; quantity: number; metadata?: Record<string, any> }): number {
@@ -49,7 +48,6 @@ export default function CartPage() {
   if (cart.length === 0) {
     return (
       <div className="bg-[#FAFAFA]">
-        <Navbar />
         <div className="min-h-[70vh] flex flex-col items-center justify-center p-4 pt-32 text-center">
           <div className="w-28 h-28 rounded-[24px] flex items-center justify-center mb-6 bg-white border border-gray-200 shadow-sm">
               {/* @ts-ignore */}
@@ -83,7 +81,6 @@ export default function CartPage() {
 
   return (
     <div className="bg-[#FAFAFA]">
-      <Navbar />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 pt-32 min-h-[100dvh]">
         <h1 className="text-3xl font-black text-gray-900 mb-10 tracking-tight">장바구니 ({cart.length})</h1>
 

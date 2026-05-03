@@ -41,7 +41,8 @@
       "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('✅' if d.get\\('success'\\) else '❌'\\)\")",
       "Bash(vercel --prod)",
       "Bash(xargs -I{} grep -L \"force-dynamic\" {})",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(ls:*)"
     ]
   }
 }

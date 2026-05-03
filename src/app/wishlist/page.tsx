@@ -8,7 +8,6 @@ import Image from 'next/image';
 import { useStore } from '@/store/useStore';
 import { Heart, ShoppingBag, X, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
-import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
 export default function WishlistPage() {
@@ -24,7 +23,6 @@ export default function WishlistPage() {
   if (wishlist.length === 0) {
     return (
       <>
-        <Navbar />
         <div className="min-h-[60vh] flex flex-col items-center justify-center p-4 pt-32">
         <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
             <Heart className="w-10 h-10 text-gray-400" />
@@ -45,7 +43,6 @@ export default function WishlistPage() {
 
   return (
     <>
-      <Navbar />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 pt-32">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">위시리스트 ({wishlist.length})</h1>
 

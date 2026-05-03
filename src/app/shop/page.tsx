@@ -1,6 +1,5 @@
 import React from 'react';
 import { getAllCategories, getCategoryBySlug } from '@/lib/categories';
-import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import type { Metadata } from 'next';
 import ShopClientContent from '@/components/ShopClientContent';
@@ -47,7 +46,6 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
 
   return (
     <>
-      <Navbar />
       <ShopClientContent
         products={[]}
         category={category}

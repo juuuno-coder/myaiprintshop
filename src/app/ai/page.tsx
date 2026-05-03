@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import AIAssistantChat from '@/components/AIAssistantChat';
-import Navbar from '@/components/Navbar';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,7 +35,6 @@ export default function AIPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 pt-28 pb-12">
         <div className="mb-8">

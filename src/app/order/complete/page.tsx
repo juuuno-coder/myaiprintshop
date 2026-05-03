@@ -8,7 +8,6 @@ import Link from 'next/link';
 import { CheckCircle2, Package, Truck, Home, ShoppingBag } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Order } from '@/lib/payment';
-import Navbar from '@/components/Navbar';
 
 function OrderCompleteContent() {
   const searchParams = useSearchParams();
@@ -35,7 +34,6 @@ function OrderCompleteContent() {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      <Navbar />
       
       <div className="pt-32 pb-20 px-4">
         <div className="max-w-2xl mx-auto">

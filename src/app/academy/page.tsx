@@ -3,7 +3,6 @@
 export const dynamic = 'force-dynamic';
 
 import React from "react";
-import Navbar from "@/components/Navbar";
 import { PlayCircle, BookOpen, User, Star, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -48,7 +47,6 @@ const featuredCourses = [
 export default function AcademyPage() {
   return (
     <main className="min-h-screen bg-white">
-      <Navbar />
       
       {/* Hero Section */}
       <section className="pt-32 pb-20 bg-gray-50 border-b border-gray-100">

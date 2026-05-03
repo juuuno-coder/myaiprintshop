@@ -1,6 +1,5 @@
 import React from 'react';
 import type { Metadata } from 'next';
-import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import BrandsClient from '@/components/store/BrandsClient';
 
@@ -14,7 +13,6 @@ export default async function BrandsPage() {
 
   return (
     <>
-      <Navbar />
       <BrandsClient brands={brands} />
       <Footer />
     </>

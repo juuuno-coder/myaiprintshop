@@ -3,7 +3,6 @@
 export const dynamic = 'force-dynamic';
 
 import React from 'react';
-import Navbar from '@/components/Navbar';
 import { motion } from 'framer-motion';
 import { Palette, Share2, TrendingUp, CheckCircle2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
@@ -29,7 +28,6 @@ const steps = [
 export default function CreatorsPage() {
   return (
     <main className="min-h-screen bg-white">
-      <Navbar />
       
       {/* Hero Section */}
       <section className="pt-32 pb-20 bg-linear-to-b from-gray-50 to-white overflow-hidden">

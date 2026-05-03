@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { getCreatorByHandle, getCreatorProductsByHandle } from '@/lib/creators';
 import { Store, ExternalLink, Instagram, Youtube, Globe, ShoppingBag } from 'lucide-react';
@@ -38,7 +37,6 @@ export default async function CreatorStorePage({ params }: Props) {
 
   return (
     <main className="min-h-screen bg-white">
-      <Navbar />
 
       {/* Hero / Cover */}
       <div className="relative h-64 bg-gradient-to-r from-emerald-600 to-teal-600">
