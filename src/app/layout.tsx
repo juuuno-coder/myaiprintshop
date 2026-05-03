@@ -18,13 +18,13 @@ export const metadata: Metadata = {
     siteName: "GOODZZ",
     title: "GOODZZ | 사진 한 장으로 시작되는 프리미엄 글로벌 굿즈",
     description: "가장 쉬운 글로벌 굿즈 커스텀 플랫폼. 지금 사진을 업로드하고 나만의 굿즈 시안을 확인하세요.",
-    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "GOODZZ" }],
+    images: [{ url: "/api/og", width: 1200, height: 630, alt: "GOODZZ" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "GOODZZ | 사진 한 장으로 시작되는 프리미엄 글로벌 굿즈",
     description: "가장 쉬운 글로벌 굿즈 커스텀 플랫폼. 지금 사진을 업로드하고 나만의 굿즈 시안을 확인하세요.",
-    images: ["/og-image.png"],
+    images: ["/api/og"],
   },
   icons: {
     icon: [{ url: "/favicon.png", type: "image/png" }],
