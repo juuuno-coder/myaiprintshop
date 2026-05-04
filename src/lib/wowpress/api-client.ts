@@ -1,271 +1,320 @@
 /**
- * WowPress API 클라이언트
+ * WowPress Open API 클라이언트
  *
- * WowPress 인쇄소 API와 통신하는 HTTP 클라이언트
- *
+ * 인증: JWT (WOWPRESS_TOKEN, 1년 유효)
  * API 문서: https://wowpress.co.kr/api/document
- * Base URL: https://api.wowpress.co.kr/api/v1/std
- *
- * 주요 기능:
- * 1. 상품 정보 조회 (prod_info)
- * 2. 주문 전송 (order_submit)
- * 3. 주문 상태 조회 (order_status)
  */
 
-const WOWPRESS_API_BASE = 'https://api.wowpress.co.kr/api/v1/std';
-const WOWPRESS_API_KEY = process.env.WOWPRESS_API_KEY;
+const API_BASE = process.env.WOWPRESS_API_URL ?? 'https://api.wowpress.co.kr';
+const FILE_BASE = process.env.WOWPRESS_FILE_URL ?? 'https://file.wowpress.co.kr';
+const TOKEN = process.env.WOWPRESS_TOKEN;
 
-/**
- * WowPress 상품 응답 타입
- */
-export interface WowPressProductResponse {
-  prodno: string;           // 상품 번호
-  prodname: string;         // 상품명
-  category: string;         // 카테고리
-  basePrice: number;        // 기본 가격
-  spec: any;                // 상품 스펙 (9-section)
-  thumbnail?: string;       // 썸네일 이미지 URL
+// ─── 공통 응답 타입 ───────────────────────────────────────────────────────────
+
+export interface WowResponse<T = unknown> {
+  resultCode: string;         // "200" | "400"
+  token: string | null;
+  reqPath: string | null;
+  statusCode: string | null;
+  resultMsg: string | null;
+  errMsg: string | null;
+  resultMap: T | null;
 }
 
-/**
- * WowPress 주문 제출 응답
- */
-export interface WowPressOrderSubmitResponse {
-  orderno: string;          // WowPress 주문 번호
-  status: string;           // 주문 상태
-  message?: string;         // 메시지
+// ─── 도메인 타입 ─────────────────────────────────────────────────────────────
+
+export interface WowProduct {
+  prodno: number;
+  prodname: string;
+  pathname: string;
+  useyn: 'Y' | 'N';
+  cdt: string;
 }
 
-/**
- * WowPress 주문 상태 응답
- */
-export interface WowPressOrderStatusResponse {
-  orderno: string;          // 주문 번호
-  status: 'pending' | 'confirmed' | 'printing' | 'shipped' | 'delivered' | 'cancelled';
-  trackingNumber?: string;  // 송장 번호
-  carrier?: string;         // 택배사
-  updatedAt: string;        // 마지막 업데이트 시간
+export interface WowProductDetail {
+  prodno: number;
+  prodname: string;
+  pjoin: number;
+  unit: number;
+  dlvygrpno: number;
+  dlvyprepay: boolean;
+  ordqty: unknown[];
+  sizeinfo: unknown[];
+  paperinfo: unknown[];
+  colorinfo: unknown[];
+  awkjobinfo: unknown[];
+  prodaddinfo: unknown[];
+  deliverinfo: unknown;
 }
 
-/**
- * WowPress API 클라이언트
- */
+export interface WowPriceRequest {
+  prodno: number;
+  ordqty: string;       // 수량
+  ordcnt: string;       // 건수
+  ordtitle: string;
+  prsjob: {
+    jobno: string;
+    covercd: number;
+    sizeno: string;
+    wsize?: string;
+    hsize?: string;
+    jobqty?: string;
+    paperno: string;
+    colorno0: string;
+    colorno0add?: string;
+    joboptmsg?: string;
+  }[];
+  awkjob: {
+    jobno: string;
+    covercd: number;
+    jobqty?: string;
+    joboptmsg?: string;
+  }[];
+}
+
+export interface WowPriceResult {
+  prodno: number;
+  ordqty: number;
+  ordcnt: number;
+  exitdate: number;
+  ordcost_price: number;
+  ordcost_dc: number;
+  ordcost_sup: number;
+  ordcost_tax: number;
+  ordcost_bill: number;
+  prsjob: unknown[];
+  awkjob: unknown[];
+}
+
+export interface WowOrderRequest {
+  action: 'ord' | 'cal';
+  ordreq: WowOrderItem[][];
+  dcpointreq?: number;
+  dlvymcd: string;
+  dlvyfr: WowAddress;
+  dlvyto: WowAddress;
+}
+
+export interface WowOrderItem {
+  prodno: number;
+  ordqty: string;
+  ordcnt: string;
+  ordtitle: string;
+  ordbody?: string;
+  ordkey: string;         // 중복 주문 방지용 — GOODZZ 주문 ID 사용
+  jobpresetno?: string;
+  prsjob: WowPriceRequest['prsjob'];
+  awkjob: WowPriceRequest['awkjob'];
+}
+
+export interface WowAddress {
+  name: string;
+  tel: string;
+  sd: string;             // 시도
+  sgg: string;            // 시군구
+  umd?: string;           // 읍면동
+  addr1: string;
+  addr2: string;
+  zipcode?: string;
+}
+
+export interface WowOrderResult {
+  action: string;
+  status: string;
+  errmsg: string | null;
+  ordcost_bill: number;
+  dlvcost_bill: number;
+  cost_bill: number;
+  ordinfo: { ordnum: string; [k: string]: unknown }[];
+  dlvinfo: unknown[];
+}
+
+export interface WowOrderDetail {
+  ordnum: string;
+  ordstat: number;        // 코드표 참조
+  jobstat: number;
+  shipnum: string | null; // 송장번호
+  dlvyno: number | null;  // 택배사 코드
+  [key: string]: unknown;
+}
+
+// ─── 주문상태 한글 변환 ───────────────────────────────────────────────────────
+
+export const WOW_ORDER_STATUS: Record<number, string> = {
+  0: '입금대기', 1: '접수대기', 2: '대체입금',
+  10: '접수진행', 12: '상담대기', 20: '생산진행',
+  30: '생산완료', 70: '출고대기', 80: '출고완료',
+  84: '배송중', 85: '배송완료', 90: '주문취소',
+};
+
+export const WOW_JOB_STATUS: Record<number, string> = {
+  100: '접수대기', 109: '파일에러', 101: '접수완료',
+  102: '업로드완료', 103: '조판완료', 104: '출력완료',
+  105: '인쇄완료', 106: '출고완료', 114: '주문취소',
+};
+
+// ─── 클라이언트 ───────────────────────────────────────────────────────────────
+
 export class WowPressClient {
-  private apiKey: string;
-  private baseUrl: string;
-  private readonly timeout = 15_000; // 15초 타임아웃
+  private readonly timeout = 15_000;
 
-  constructor() {
-    if (!WOWPRESS_API_KEY) {
-      console.warn('⚠️  WOWPRESS_API_KEY가 설정되지 않았습니다');
+  private get headers() {
+    if (!TOKEN) throw new Error('WOWPRESS_TOKEN 환경변수가 설정되지 않았습니다');
+    return {
+      'Authorization': `Bearer ${TOKEN}`,
+      'Content-Type': 'application/json;charset=UTF-8',
+    };
+  }
+
+  private async request<T>(
+    url: string,
+    init: RequestInit = {}
+  ): Promise<WowResponse<T>> {
+    const res = await fetch(url, {
+      ...init,
+      headers: { ...this.headers, ...(init.headers ?? {}) },
+      signal: AbortSignal.timeout(this.timeout),
+    });
+
+    const data: WowResponse<T> = await res.json();
+
+    if (data.resultCode !== '200') {
+      throw new Error(`WowPress API 오류 [${url}]: ${data.errMsg ?? data.resultMsg ?? data.resultCode}`);
     }
 
-    this.apiKey = WOWPRESS_API_KEY || '';
-    this.baseUrl = WOWPRESS_API_BASE;
+    return data;
   }
 
-  private fetchWithTimeout(url: string, options: RequestInit): Promise<Response> {
-    return fetch(url, { ...options, signal: AbortSignal.timeout(this.timeout) });
+  // ── 회원정보 ──────────────────────────────────────────────────────────────
+
+  async getMyInfo() {
+    const res = await this.request<{ mpagMainMap: unknown }>(`${API_BASE}/api/v1/mpag/myinfo/view`);
+    return res.resultMap;
   }
 
-  /**
-   * 상품 정보 조회
-   *
-   * GET /api/v1/std/prod_info/{prodno}
-   *
-   * @param prodno - WowPress 상품 번호
-   * @returns 상품 정보
-   */
-  async getProduct(prodno: string): Promise<WowPressProductResponse> {
-    const url = `${this.baseUrl}/prod_info/${prodno}`;
+  // ── 제품 목록 / 상세 ──────────────────────────────────────────────────────
 
-    console.log(`🔍 Fetching WowPress product: ${prodno}`);
-
-    try {
-      const response = await this.fetchWithTimeout(url, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        // 캐시 설정 (1시간)
-        next: {
-          revalidate: 3600,
-        },
-      } as RequestInit);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(
-          `WowPress API error (${response.status}): ${errorText}`
-        );
-      }
-
-      const data = await response.json();
-
-      console.log(`✅ Product fetched: ${data.prodname}`);
-
-      return data;
-    } catch (error) {
-      console.error(`❌ Failed to fetch WowPress product ${prodno}:`, error);
-      throw error;
-    }
+  async getProductList(): Promise<WowProduct[]> {
+    const res = await this.request<{ prodlist: WowProduct[] }>(
+      `${API_BASE}/api/v1/std/prodlist`
+    );
+    return res.resultMap?.prodlist ?? [];
   }
 
-  /**
-   * 주문 제출
-   *
-   * POST /api/v1/std/order_submit
-   *
-   * @param orderData - WowPress 주문 데이터 (9-section spec)
-   * @returns 주문 번호
-   */
-  async submitOrder(orderData: any): Promise<WowPressOrderSubmitResponse> {
-    const url = `${this.baseUrl}/order_submit`;
-
-    console.log('📤 Submitting order to WowPress...');
-
-    try {
-      const response = await this.fetchWithTimeout(url, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(orderData),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        let errorData;
-
-        try {
-          errorData = JSON.parse(errorText);
-        } catch {
-          errorData = { message: errorText };
-        }
-
-        throw new Error(
-          `WowPress order submission failed (${response.status}): ${
-            errorData.message || errorText
-          }`
-        );
-      }
-
-      const data = await response.json();
-
-      console.log(`✅ Order submitted: ${data.orderno}`);
-
-      return data;
-    } catch (error) {
-      console.error('❌ Failed to submit order to WowPress:', error);
-      throw error;
-    }
+  async getProductDetail(prodno: number): Promise<WowProductDetail> {
+    const res = await this.request<{ prod_info: WowProductDetail }>(
+      `${API_BASE}/api/v1/std/prod_info/${prodno}`,
+      { next: { revalidate: 3600 } } as RequestInit
+    );
+    const detail = res.resultMap?.prod_info;
+    if (!detail) throw new Error(`제품 상세 없음: ${prodno}`);
+    return detail;
   }
 
-  /**
-   * 주문 상태 조회
-   *
-   * GET /api/v1/std/order_status/{orderno}
-   *
-   * @param orderno - WowPress 주문 번호
-   * @returns 주문 상태
-   */
-  async getOrderStatus(orderno: string): Promise<WowPressOrderStatusResponse> {
-    const url = `${this.baseUrl}/order_status/${orderno}`;
+  // ── 가격 조회 ─────────────────────────────────────────────────────────────
 
-    console.log(`🔍 Checking WowPress order status: ${orderno}`);
+  async getPrice(req: WowPriceRequest): Promise<WowPriceResult> {
+    const res = await this.request<{ cjson_jobcost: WowPriceResult }>(
+      `${API_BASE}/api/v1/ord/cjson_jobcost`,
+      { method: 'POST', body: JSON.stringify(req) }
+    );
+    const result = res.resultMap?.cjson_jobcost;
+    if (!result) throw new Error('가격 조회 결과 없음');
+    return result;
+  }
 
-    try {
-      const response = await this.fetchWithTimeout(url, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json',
-        },
-      });
+  // ── 주문 ──────────────────────────────────────────────────────────────────
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(
-          `Failed to fetch order status (${response.status}): ${errorText}`
-        );
-      }
+  async placeOrder(req: WowOrderRequest): Promise<WowOrderResult> {
+    const res = await this.request<{ cjson_order: WowOrderResult }>(
+      `${API_BASE}/api/v1/ord/cjson_order`,
+      { method: 'POST', body: JSON.stringify(req) }
+    );
+    const result = res.resultMap?.cjson_order;
+    if (!result) throw new Error('주문 결과 없음');
+    if (result.status !== '200') throw new Error(`주문 실패: ${result.errmsg}`);
+    return result;
+  }
 
-      const data = await response.json();
+  async cancelOrder(ordnum: string): Promise<void> {
+    await this.request(
+      `${API_BASE}/api/v1/ord/ord_cancel`,
+      { method: 'POST', body: JSON.stringify({ ordnum }) }
+    );
+  }
 
-      console.log(`✅ Order status: ${data.status}`);
+  // ── 주문 조회 ─────────────────────────────────────────────────────────────
 
-      return data;
-    } catch (error) {
-      console.error(`❌ Failed to check order status ${orderno}:`, error);
-      throw error;
+  async getOrderDetail(ordnum: string): Promise<WowOrderDetail> {
+    const res = await this.request<WowOrderDetail>(
+      `${API_BASE}/api/v1/ord/order/${ordnum}`
+    );
+    if (!res.resultMap) throw new Error(`주문 없음: ${ordnum}`);
+    return res.resultMap;
+  }
+
+  async getOrderList(params: {
+    stdt: string; eddt: string;
+    validord?: 'Y' | 'N'; ordnum?: string; ordkey?: string;
+    pageIndex?: number; recordCountPerPage?: number;
+  }) {
+    const res = await this.request<{ list: unknown[] }>(
+      `${API_BASE}/api/v1/ord/ord_list`,
+      { method: 'POST', body: JSON.stringify(params) }
+    );
+    return res.resultMap?.list ?? [];
+  }
+
+  // ── 파일 업로드 ───────────────────────────────────────────────────────────
+
+  /** URL로 파일 업로드 (비동기, 콜백 지원) */
+  async uploadFileFromUrl(params: {
+    ordnum: string;
+    filename: string;
+    fileurl: string;
+    returnUrl?: string;
+  }): Promise<void> {
+    const form = new FormData();
+    form.append('ordnum', params.ordnum);
+    form.append('filename', params.filename);
+    form.append('fileurl', params.fileurl);
+    if (params.returnUrl) form.append('returnUrl', params.returnUrl);
+
+    const res = await fetch(`${FILE_BASE}/api/v1/file/uploadasyc`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${TOKEN}` },
+      body: form,
+      signal: AbortSignal.timeout(this.timeout),
+    });
+
+    const data: WowResponse = await res.json();
+    if (data.resultCode !== '200') {
+      throw new Error(`파일 업로드 실패: ${data.errMsg ?? data.resultCode}`);
     }
   }
 
-  /**
-   * 상품 목록 조회 (배치)
-   *
-   * 여러 상품을 한 번에 조회
-   *
-   * @param prodnos - 상품 번호 배열
-   * @returns 상품 정보 배열
-   */
-  async getProducts(prodnos: string[]): Promise<WowPressProductResponse[]> {
-    console.log(`🔍 Fetching ${prodnos.length} WowPress products in batch...`);
+  // ── 콜백 URL 등록 ─────────────────────────────────────────────────────────
 
-    // 병렬로 조회 (최대 5개씩)
-    const batchSize = 5;
-    const results: WowPressProductResponse[] = [];
-
-    for (let i = 0; i < prodnos.length; i += batchSize) {
-      const batch = prodnos.slice(i, i + batchSize);
-      const batchResults = await Promise.allSettled(
-        batch.map((prodno) => this.getProduct(prodno))
-      );
-      for (const result of batchResults) {
-        if (result.status === 'fulfilled') {
-          results.push(result.value);
-        } else {
-          console.error('❌ Batch product fetch failed:', result.reason);
-        }
-      }
-    }
-
-    console.log(`✅ Batch fetch completed: ${results.length} products`);
-
-    return results;
-  }
-
-  /**
-   * API 연결 테스트
-   *
-   * @returns API 연결 성공 여부
-   */
-  async testConnection(): Promise<boolean> {
-    try {
-      // 테스트용 상품 번호로 API 연결 확인
-      // 실제 상품 번호는 WowPress에서 제공받아야 함
-      await this.getProduct('TEST_001');
-      return true;
-    } catch (error) {
-      console.error('WowPress API connection test failed:', error);
-      return false;
+  async registerCallbackUrl(callbackUrl: string): Promise<void> {
+    const form = new URLSearchParams({ cbkurl: callbackUrl });
+    const res = await fetch(`${API_BASE}/api/v1/mpag/cbkurl/update`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${TOKEN}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: form.toString(),
+      signal: AbortSignal.timeout(this.timeout),
+    });
+    const data: WowResponse = await res.json();
+    if (data.resultCode !== '200') {
+      throw new Error(`콜백 URL 등록 실패: ${data.errMsg}`);
     }
   }
 }
 
-/**
- * 싱글톤 인스턴스
- */
-let wowPressClient: WowPressClient | null = null;
-
-/**
- * WowPress 클라이언트 인스턴스 가져오기
- */
-export function getWowPressClient(): WowPressClient {
-  if (!wowPressClient) {
-    wowPressClient = new WowPressClient();
-  }
-  return wowPressClient;
+// 싱글톤
+let _client: WowPressClient | null = null;
+export function getWowPressClient() {
+  return (_client ??= new WowPressClient());
 }
