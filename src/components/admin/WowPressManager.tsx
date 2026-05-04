@@ -80,6 +80,10 @@ export default function WowPressManager() {
   const [cbLoading, setCbLoading] = useState(false);
   const [cbMsg, setCbMsg] = useState('');
 
+  // 전체 상품 동기화
+  const [syncLoading, setSyncLoading] = useState(false);
+  const [syncResult, setSyncResult] = useState<{ synced: number; total: number; errors: string[] } | null>(null);
+
   // GOODZZ 제품 목록 로드
   const loadProducts = useCallback(async () => {
     setLoading(true);
@@ -171,6 +175,26 @@ export default function WowPressManager() {
     }
   }
 
+  // 전체 WowPress 상품 동기화
+  async function syncAll() {
+    setSyncLoading(true);
+    setSyncResult(null);
+    try {
+      const res = await authFetch('/api/admin/wow/sync', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        setSyncResult(data.result);
+        await loadProducts();
+      } else {
+        setSyncResult({ synced: 0, total: 0, errors: [data.error ?? '동기화 실패'] });
+      }
+    } catch (e) {
+      setSyncResult({ synced: 0, total: 0, errors: [(e as Error).message] });
+    } finally {
+      setSyncLoading(false);
+    }
+  }
+
   // 콜백 URL 등록
   async function registerCallback() {
     setCbLoading(true);
@@ -199,7 +223,15 @@ export default function WowPressManager() {
           </h2>
           <p className="text-sm text-gray-500 mt-1">GOODZZ 제품에 WowPress 인쇄 옵션을 연결합니다</p>
         </div>
-        <div className="flex gap-2 items-center">
+        <div className="flex flex-wrap gap-2 items-center">
+          <button
+            onClick={syncAll}
+            disabled={syncLoading}
+            className="flex items-center gap-2 px-4 py-2 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50"
+          >
+            {syncLoading ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+            {syncLoading ? '동기화 중...' : '전체 상품 동기화'}
+          </button>
           <button
             onClick={registerCallback}
             disabled={cbLoading}
@@ -209,6 +241,12 @@ export default function WowPressManager() {
             콜백 URL 등록
           </button>
           {cbMsg && <span className="text-xs text-green-600">{cbMsg}</span>}
+          {syncResult && (
+            <span className={`text-xs font-medium ${syncResult.errors.length > 0 ? 'text-orange-600' : 'text-green-600'}`}>
+              동기화 완료: {syncResult.synced}/{syncResult.total}건
+              {syncResult.errors.length > 0 && ` (오류 ${syncResult.errors.length}건)`}
+            </span>
+          )}
         </div>
       </div>
 

@@ -45,6 +45,33 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   // WowPress 실시간 가격 상태
   const [wowPrice, setWowPrice] = useState<number | null>(null);
   const [wowLoading, setWowLoading] = useState(false);
+
+  // 자동 동기화 WowPress 상품: 선택 가능한 옵션 (규격/도수/지질)
+  const wowOptions = isWowProduct ? (product.metadata?.wowOptions as {
+    sizes: { sizeno: string; sizename: string; jobno: string }[];
+    colors: { colorno: string; colorname: string }[];
+    papers: { sizeno: string; paperno: string; papername: string }[];
+  } | undefined) : undefined;
+
+  const [selectedWowSize, setSelectedWowSize] = useState<string>(
+    wowOptions?.sizes[0]?.sizeno ?? product.wowpressMapping?.sizeno ?? ''
+  );
+  const [selectedWowColor, setSelectedWowColor] = useState<string>(
+    wowOptions?.colors[0]?.colorno ?? product.wowpressMapping?.colorno0 ?? ''
+  );
+  const [selectedWowPaper, setSelectedWowPaper] = useState<string>(() => {
+    const firstSizeno = wowOptions?.sizes[0]?.sizeno ?? '';
+    return wowOptions?.papers.find(p => p.sizeno === firstSizeno)?.paperno
+      ?? product.wowpressMapping?.paperno ?? '';
+  });
+
+  // 규격 변경 시 지질 초기화
+  useEffect(() => {
+    if (!wowOptions) return;
+    const firstPaper = wowOptions.papers.find(p => p.sizeno === selectedWowSize)?.paperno;
+    if (firstPaper) setSelectedWowPaper(firstPaper);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedWowSize]);
   
   // AI & Order State
   const [orderMethod, setOrderMethod] = useState<'self' | 'request' | 'upload'>('self');
@@ -117,7 +144,21 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     if (!isWowProduct || !product.wowpressMapping) return;
     setWowLoading(true);
     const mapping = product.wowpressMapping;
-    const prsjob = [{ jobno: mapping.jobno }, ...(mapping.awkjob || [])];
+
+    // 동적 옵션 상품은 선택된 규격의 jobno를, 고정 상품은 mapping.jobno 사용
+    const jobno = wowOptions?.sizes.find(s => s.sizeno === selectedWowSize)?.jobno ?? mapping.jobno;
+    const sizeno = wowOptions ? selectedWowSize : mapping.sizeno;
+    const colorno0 = wowOptions ? selectedWowColor : mapping.colorno0;
+    const paperno = wowOptions ? selectedWowPaper : mapping.paperno;
+
+    const prsjob = [{
+      jobno,
+      sizeno,
+      paperno,
+      colorno0,
+      covercd: mapping.covercd ?? 0,
+    }];
+
     const timer = setTimeout(async () => {
       try {
         const res = await fetch('/api/wow/price', {
@@ -127,9 +168,11 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         });
         const data = await res.json();
         if (data.success && data.price?.totprc) {
-          // 벤더 마진율 계산 후 고객 판매가 산출
-          const costBase = (product.metadata?.costPrice as number) || product.price;
-          const marginRate = costBase > 0 ? (product.price - costBase) / costBase : 0;
+          // 자동 동기화 상품(price=0)은 WowPress 원가 그대로, 벤더 매핑 상품은 마진율 적용
+          const costBase = (product.metadata?.costPrice as number) || 0;
+          const marginRate = (costBase > 0 && product.price > 0)
+            ? (product.price - costBase) / costBase
+            : 0;
           const newSellPrice = Math.ceil(data.price.totprc * (1 + marginRate));
           setWowPrice(newSellPrice);
         }
@@ -140,7 +183,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       }
     }, 400);
     return () => clearTimeout(timer);
-  }, [quantity, isWowProduct, product.wowpressMapping, product.price, product.metadata]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quantity, selectedWowSize, selectedWowColor, selectedWowPaper, isWowProduct]);
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -599,6 +643,77 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
         {/* Quantity and Variations (Matches real site) */}
         <div className="pt-6 border-t border-gray-100 space-y-4">
+          {/* WowPress 자동 동기화 상품: 규격/도수/지질 선택 */}
+          {isWowProduct && wowOptions && (
+            <div className="space-y-3 pb-4 border-b border-gray-100">
+              {/* 규격 선택 */}
+              {wowOptions.sizes.length > 0 && (
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-400">규격</label>
+                  <div className="flex flex-wrap gap-2">
+                    {wowOptions.sizes.map(size => (
+                      <button
+                        key={size.sizeno}
+                        onClick={() => setSelectedWowSize(size.sizeno)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold border-2 transition-all ${
+                          selectedWowSize === size.sizeno
+                            ? 'bg-indigo-600 text-white border-indigo-600'
+                            : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'
+                        }`}
+                      >
+                        {size.sizename}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {/* 도수 선택 */}
+              {wowOptions.colors.length > 0 && (
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-400">도수</label>
+                  <div className="flex flex-wrap gap-2">
+                    {wowOptions.colors.map(color => (
+                      <button
+                        key={color.colorno}
+                        onClick={() => setSelectedWowColor(color.colorno)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold border-2 transition-all ${
+                          selectedWowColor === color.colorno
+                            ? 'bg-indigo-600 text-white border-indigo-600'
+                            : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'
+                        }`}
+                      >
+                        {color.colorname}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {/* 지질 선택 (규격에 따라 필터) */}
+              {wowOptions.papers.filter(p => p.sizeno === selectedWowSize).length > 0 && (
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-400">지질</label>
+                  <div className="flex flex-wrap gap-2">
+                    {wowOptions.papers
+                      .filter(p => p.sizeno === selectedWowSize)
+                      .map(paper => (
+                        <button
+                          key={paper.paperno}
+                          onClick={() => setSelectedWowPaper(paper.paperno)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold border-2 transition-all ${
+                            selectedWowPaper === paper.paperno
+                              ? 'bg-indigo-600 text-white border-indigo-600'
+                              : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'
+                          }`}
+                        >
+                          {paper.papername}
+                        </button>
+                      ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {isWowProduct ? (
             /* WowPress 인쇄 상품: 수량 프리셋 버튼 */
             <div className="space-y-2">

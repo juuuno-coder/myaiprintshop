@@ -79,6 +79,10 @@
   ],
   "crons": [
     {
+      "path": "/api/cron/sync-wow-products",
+      "schedule": "0 3 * * *"
+    },
+    {
       "path": "/api/cron/sync-wowpress-orders",
       "schedule": "0 */4 * * *"
     },
