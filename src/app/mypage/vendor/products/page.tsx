@@ -15,6 +15,7 @@ import {
   MoreVertical,
   CheckCircle2,
   XCircle,
+  Printer,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
@@ -111,13 +112,22 @@ export default function VendorProductsPage() {
                 {vendor?.businessName} - 총 {products.length}개 상품
               </p>
             </div>
-            <button
-              onClick={() => router.push('/mypage/vendor/products/new')}
-              className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-amber-500 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
-            >
-              <Plus className="w-5 h-5" />
-              상품 등록
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={() => router.push('/mypage/vendor/products/new-print')}
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
+              >
+                <Printer className="w-5 h-5" />
+                인쇄 상품 등록
+              </button>
+              <button
+                onClick={() => router.push('/mypage/vendor/products/new')}
+                className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-amber-500 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
+              >
+                <Plus className="w-5 h-5" />
+                상품 등록
+              </button>
+            </div>
           </div>
 
           {/* Filters */}
