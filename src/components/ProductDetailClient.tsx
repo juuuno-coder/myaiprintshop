@@ -36,7 +36,15 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [selectedColor, setSelectedColor] = useState<string>('');
-  const [quantity, setQuantity] = useState(1);
+
+  // WowPress 인쇄 상품 여부 감지
+  const isWowProduct = !!product.wowpressMapping;
+  const defaultQty = isWowProduct ? ((product.metadata?.defaultQty as number) || 50) : 1;
+  const [quantity, setQuantity] = useState(defaultQty);
+
+  // WowPress 실시간 가격 상태
+  const [wowPrice, setWowPrice] = useState<number | null>(null);
+  const [wowLoading, setWowLoading] = useState(false);
   
   // AI & Order State
   const [orderMethod, setOrderMethod] = useState<'self' | 'request' | 'upload'>('self');
@@ -103,6 +111,36 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       setBulkSubmitting(false);
     }
   };
+
+  // WowPress 실시간 가격 조회 (400ms 디바운스)
+  useEffect(() => {
+    if (!isWowProduct || !product.wowpressMapping) return;
+    setWowLoading(true);
+    const mapping = product.wowpressMapping;
+    const prsjob = [{ jobno: mapping.jobno }, ...(mapping.awkjob || [])];
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch('/api/wow/price', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prodno: mapping.prodno, ordqty: quantity, prsjob }),
+        });
+        const data = await res.json();
+        if (data.success && data.price?.totprc) {
+          // 벤더 마진율 계산 후 고객 판매가 산출
+          const costBase = (product.metadata?.costPrice as number) || product.price;
+          const marginRate = costBase > 0 ? (product.price - costBase) / costBase : 0;
+          const newSellPrice = Math.ceil(data.price.totprc * (1 + marginRate));
+          setWowPrice(newSellPrice);
+        }
+      } catch {
+        // 실패 시 기본 product.price 유지
+      } finally {
+        setWowLoading(false);
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [quantity, isWowProduct, product.wowpressMapping, product.price, product.metadata]);
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -187,11 +225,15 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         }
     }
 
+    const cartPrice = isWowProduct
+      ? (wowPrice ?? product.price)
+      : currentPrice * (variations || 1);
+
     const { addToCart: storeAddToCart } = useStore.getState();
     storeAddToCart({
         productId: product.id,
         name: product.name,
-        price: currentPrice * (variations || 1), // Multiplied by variations
+        price: cartPrice,
         thumbnail: product.thumbnail,
         quantity: quantity,
         color: selectedColor || 'Standard',
@@ -200,9 +242,10 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         selectedOptions: serializedOptions,
         metadata: {
             orderMethod: orderMethod,
-            variations: variations,
-            baseUnitPrice: currentPrice,
-            volumePricing: product.volumePricing || null
+            variations: isWowProduct ? 1 : variations,
+            baseUnitPrice: isWowProduct ? Math.ceil(cartPrice / quantity) : currentPrice,
+            volumePricing: product.volumePricing || null,
+            ...(isWowProduct ? { isWowProduct: true, wowpressMapping: product.wowpressMapping } : {}),
         }
     });
 
@@ -556,57 +599,121 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
         {/* Quantity and Variations (Matches real site) */}
         <div className="pt-6 border-t border-gray-100 space-y-4">
-          <div className="grid grid-cols-2 gap-6">
+          {isWowProduct ? (
+            /* WowPress 인쇄 상품: 수량 프리셋 버튼 */
             <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-400">수량 (개)</label>
-              <div className="flex items-center justify-between bg-gray-50 p-3 rounded-2xl border border-gray-100">
-                <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm border border-gray-100 hover:bg-gray-50">
-                  <Minus size={14} />
-                </button>
-                <span className="font-black text-lg">{quantity}</span>
-                <button onClick={() => setQuantity(quantity + 1)} className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm border border-gray-100 hover:bg-gray-50">
-                  <Plus size={14} />
-                </button>
+              <label className="text-xs font-bold text-gray-400">인쇄 수량 (최소 50개)</label>
+              <div className="flex flex-wrap gap-2">
+                {[50, 100, 200, 300, 500, 1000, 2000, 3000, 5000].map(qty => (
+                  <button
+                    key={qty}
+                    onClick={() => setQuantity(qty)}
+                    className={`px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all ${
+                      quantity === qty
+                        ? 'bg-indigo-600 text-white border-indigo-600'
+                        : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'
+                    }`}
+                  >
+                    {qty.toLocaleString()}개
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-2 mt-1">
+                <input
+                  type="number"
+                  min={50}
+                  max={5000}
+                  value={quantity}
+                  onChange={(e) => setQuantity(Math.max(50, Math.min(5000, parseInt(e.target.value) || 50)))}
+                  className="w-28 px-3 py-2 border-2 border-gray-200 rounded-xl text-sm font-bold focus:border-indigo-500 focus:outline-none"
+                />
+                <span className="text-xs text-gray-400">직접 입력 (50~5000)</span>
               </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-400">건수 (종류)</label>
-              <div className="flex items-center justify-between bg-gray-50 p-3 rounded-2xl border border-gray-100">
-                <button onClick={() => setVariations(Math.max(1, variations - 1))} className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm border border-gray-100 hover:bg-gray-50">
-                  <Minus size={14} />
-                </button>
-                <span className="font-black text-lg">{variations}</span>
-                <button onClick={() => setVariations(variations + 1)} className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm border border-gray-100 hover:bg-gray-50">
-                  <Plus size={14} />
-                </button>
+          ) : (
+            /* 일반 상품: 기존 +/- 방식 */
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-gray-400">수량 (개)</label>
+                <div className="flex items-center justify-between bg-gray-50 p-3 rounded-2xl border border-gray-100">
+                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm border border-gray-100 hover:bg-gray-50">
+                    <Minus size={14} />
+                  </button>
+                  <span className="font-black text-lg">{quantity}</span>
+                  <button onClick={() => setQuantity(quantity + 1)} className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm border border-gray-100 hover:bg-gray-50">
+                    <Plus size={14} />
+                  </button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-gray-400">건수 (종류)</label>
+                <div className="flex items-center justify-between bg-gray-50 p-3 rounded-2xl border border-gray-100">
+                  <button onClick={() => setVariations(Math.max(1, variations - 1))} className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm border border-gray-100 hover:bg-gray-50">
+                    <Minus size={14} />
+                  </button>
+                  <span className="font-black text-lg">{variations}</span>
+                  <button onClick={() => setVariations(variations + 1)} className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm border border-gray-100 hover:bg-gray-50">
+                    <Plus size={14} />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Pricing Details & Summary */}
           <div className="bg-gray-50 rounded-[2rem] p-6 border border-gray-100 space-y-4">
-             <div className="flex justify-between items-center cursor-pointer group" onClick={() => setShowPriceDetails(!showPriceDetails)}>
+             <div className="flex justify-between items-center cursor-pointer group" onClick={() => !isWowProduct && setShowPriceDetails(!showPriceDetails)}>
                 <div className="flex items-center gap-1.5 text-xs font-bold text-gray-400 group-hover:text-gray-900 transition-colors">
-                  상세 견적 보기
-                  <ChevronRight size={14} className={`transition-transform duration-300 ${showPriceDetails ? 'rotate-90' : ''}`} />
+                  {isWowProduct ? (
+                    wowLoading ? (
+                      <span className="flex items-center gap-1"><Loader2 size={12} className="animate-spin" /> 가격 계산 중...</span>
+                    ) : (
+                      <span>{quantity.toLocaleString()}개 기준 총액</span>
+                    )
+                  ) : (
+                    <>상세 견적 보기<ChevronRight size={14} className={`transition-transform duration-300 ${showPriceDetails ? 'rotate-90' : ''}`} /></>
+                  )}
                 </div>
                 <div className="text-right">
-                  <motion.p 
-                      key={currentPrice * quantity * variations}
+                  {isWowProduct ? (
+                    <motion.p
+                      key={`${wowPrice}-${quantity}`}
                       initial={{ opacity: 0, x: 10 }}
                       animate={{ opacity: 1, x: 0 }}
                       className="text-3xl font-black text-gray-900 tracking-tight"
                       style={{ fontFamily: "'Outfit', sans-serif" }}
-                  >
-                      {((currentPrice * quantity * variations) * 1.1).toLocaleString()}원
-                      <span className="text-[10px] font-bold text-gray-400 ml-2 uppercase tracking-widest">Inc. VAT</span>
-                  </motion.p>
+                    >
+                      {wowLoading ? (
+                        <span className="text-gray-400">—</span>
+                      ) : (
+                        <>{(wowPrice ?? product.price).toLocaleString()}원</>
+                      )}
+                      <span className="text-[10px] font-bold text-gray-400 ml-2 uppercase tracking-widest">VAT 포함</span>
+                    </motion.p>
+                  ) : (
+                    <motion.p
+                        key={currentPrice * quantity * variations}
+                        initial={{ opacity: 0, x: 10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="text-3xl font-black text-gray-900 tracking-tight"
+                        style={{ fontFamily: "'Outfit', sans-serif" }}
+                    >
+                        {((currentPrice * quantity * variations) * 1.1).toLocaleString()}원
+                        <span className="text-[10px] font-bold text-gray-400 ml-2 uppercase tracking-widest">Inc. VAT</span>
+                    </motion.p>
+                  )}
                 </div>
              </div>
 
+             {isWowProduct && !wowLoading && wowPrice && (
+               <div className="text-xs text-gray-400 text-right">
+                 단가 {Math.ceil(wowPrice / quantity).toLocaleString()}원/개
+               </div>
+             )}
+
              <AnimatePresence>
-                {showPriceDetails && (
-                  <motion.div 
+                {!isWowProduct && showPriceDetails && (
+                  <motion.div
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
