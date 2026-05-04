@@ -65,6 +65,17 @@ export interface Product {
   vendorId: string; // vendors 컬렉션 ID
   vendorName?: string; // 캐시 (판매자명)
   vendorType: 'platform' | 'marketplace'; // 'platform' = GOODZZ 직판
+  // WowPress 인쇄 연동 매핑
+  wowpressMapping?: {
+    prodno: number;
+    prodname?: string;
+    jobno: string;
+    sizeno: string;
+    colorno0: string;
+    paperno: string;
+    covercd?: number;
+    awkjob?: { jobno: string }[];
+  };
   // Metadata (확장 가능한 추가 정보)
   metadata?: Record<string, any>; // WowPress 연동 정보, 외부 시스템 ID 등
   createdAt: Date | Timestamp;
@@ -139,6 +150,8 @@ function docToProduct(doc: DocumentData, id: string): Product {
     vendorId: data.vendorId || 'PLATFORM_DEFAULT',
     vendorName: data.vendorName || 'GOODZZ',
     vendorType: data.vendorType || 'platform',
+    wowpressMapping: data.wowpressMapping,
+    metadata: data.metadata,
     createdAt: data.createdAt?.toDate?.() || new Date(),
     updatedAt: data.updatedAt?.toDate?.() || new Date(),
   };

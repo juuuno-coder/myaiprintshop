@@ -14,6 +14,7 @@ import DesignManager from '@/components/admin/DesignManager';
 import VendorManager from '@/components/admin/VendorManager';
 import SettlementManager from '@/components/admin/SettlementManager';
 import CouponManager from '@/components/admin/CouponManager';
+import WowPressManager from '@/components/admin/WowPressManager';
 import { useAuth } from '@/context/AuthContext';
 import {
   LayoutDashboard,
@@ -36,7 +37,8 @@ import {
   LogIn,
   ShieldAlert,
   DollarSign,
-  Ticket
+  Ticket,
+  Printer
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
@@ -442,6 +444,7 @@ export default function AdminPage() {
     { id: 'coupons', label: '쿠폰 관리', icon: <Ticket size={20} /> },
     { id: 'banners', label: '배너 관리', icon: <Image size={20} /> },
     { id: 'reviews', label: '리뷰 관리', icon: <MessageSquare size={20} /> },
+    { id: 'wowpress', label: 'WowPress', icon: <Printer size={20} /> },
     { id: 'export-voucher', label: '수출바우처', icon: <FileText size={20} /> },
     { id: 'settings', label: '설정', icon: <Settings size={20} /> },
   ];
@@ -457,6 +460,7 @@ export default function AdminPage() {
       case 'designs': return 'AI 디자인 관리';
       case 'banners': return '배너 및 팝업 관리';
       case 'reviews': return '리뷰 관리';
+      case 'wowpress': return 'WowPress 제품 매핑';
       case 'export-voucher': return '수출바우처 사업계획서';
       case 'settings': return '시스템 설정';
       default: return '관리자';
@@ -518,7 +522,9 @@ export default function AdminPage() {
           {activeTab === 'banners' && <BannerManager />}
 
           {activeTab === 'reviews' && <ReviewAdmin />}
-          
+
+          {activeTab === 'wowpress' && <WowPressManager />}
+
           {activeTab === 'export-voucher' && (
             <div className={styles.recentOrders}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
