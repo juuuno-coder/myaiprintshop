@@ -8,11 +8,30 @@
  *   4. Firestore 로그 저장
  */
 
-import { getWowPressClient, WowOrderRequest, WOW_ORDER_STATUS } from './api-client';
+import { getWowPressClient, WowOrderRequest, WowAddress, WOW_ORDER_STATUS } from './api-client';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, doc, updateDoc, Timestamp } from 'firebase/firestore';
 
 export const WOWPRESS_VENDOR_ID = 'VENDOR_WOWPRESS';
+
+// ─── 주소 파서 ────────────────────────────────────────────────────────────────
+
+/**
+ * 카카오/다음 주소검색 결과 문자열을 WowPress 분리 주소로 변환
+ * 입력 예) "서울특별시 강남구 역삼동 테헤란로 123"
+ */
+function parseKoreanAddress(address: string, detail: string): Pick<WowAddress, 'sd' | 'sgg' | 'umd' | 'addr1' | 'addr2'> {
+  const parts = address.trim().split(/\s+/);
+
+  // 1번째: 시도 (서울특별시, 경기도, 부산광역시 …)
+  const sd = parts[0] ?? '';
+  // 2번째: 시군구 (강남구, 수원시, 해운대구 …)
+  const sgg = parts[1] ?? '';
+  // 3번째: 읍면동 (있으면)
+  const umd = parts[2] ?? '';
+
+  return { sd, sgg, umd, addr1: address, addr2: detail };
+}
 
 // ─── 타입 ─────────────────────────────────────────────────────────────────────
 
@@ -32,15 +51,16 @@ export interface WowPressMapping {
 /**
  * GOODZZ 주문을 WowPress로 전달
  *
- * @param order - GOODZZ 주문 객체 (Firestore orders 문서)
+ * @param order - GOODZZ 주문 객체 (Firestore orders 문서, payment.ts Order 타입)
  */
 export async function forwardOrderToWowPress(order: {
   id: string;
   shippingInfo: {
-    name: string; phone: string;
+    name: string;
+    phone: string;
+    address: string;      // 전체 주소 문자열 (카카오 주소검색)
+    addressDetail: string;
     postalCode?: string;
-    sd: string; sgg: string; umd?: string;
-    addr1: string; addr2: string;
   };
   vendorOrders?: {
     vendorId: string;
@@ -109,11 +129,7 @@ export async function forwardOrderToWowPress(order: {
           dlvyto: {
             name: order.shippingInfo.name,
             tel: order.shippingInfo.phone.replace(/-/g, ''),
-            sd: order.shippingInfo.sd,
-            sgg: order.shippingInfo.sgg,
-            umd: order.shippingInfo.umd,
-            addr1: order.shippingInfo.addr1,
-            addr2: order.shippingInfo.addr2,
+            ...parseKoreanAddress(order.shippingInfo.address, order.shippingInfo.addressDetail),
             zipcode: order.shippingInfo.postalCode,
           },
         };
@@ -221,4 +237,46 @@ export async function handleWowCallback(payload: {
   await updateDoc(doc(db, 'orders', goodzzOrderId), updateData);
 
   console.log(`[WowPress] 콜백 처리 완료: ${ordnum} → ${WOW_ORDER_STATUS[ordstat]}`);
+}
+
+// ─── 활성 주문 수동 동기화 (관리자용, 폴링 fallback) ─────────────────────────
+
+/**
+ * 진행중인 WowPress 주문 상태를 직접 API로 조회해 갱신
+ * 콜백이 누락된 경우 복구용 — /api/admin/sync-orders에서 호출
+ */
+export async function syncActiveOrders(): Promise<{ success: number; failed: number }> {
+  const { query, where, getDocs } = await import('firebase/firestore');
+  const logsRef = collection(db, 'wowpress_order_logs');
+  const snap = await getDocs(
+    query(logsRef, where('status', '==', 'forwarded'))
+  );
+
+  const client = getWowPressClient();
+  let success = 0;
+  let failed = 0;
+
+  for (const logDoc of snap.docs) {
+    const { wow_ordnum, goodzz_order_id, product_id } = logDoc.data() as {
+      wow_ordnum: string;
+      goodzz_order_id: string;
+      product_id: string;
+    };
+
+    try {
+      const detail = await client.getOrderDetail(wow_ordnum);
+      await handleWowCallback({
+        ordnum: wow_ordnum,
+        ordstat: detail.ordstat,
+        jobstat: detail.jobstat,
+        shipnum: detail.shipnum ?? undefined,
+      });
+      success++;
+    } catch (err) {
+      console.error(`[WowPress] 동기화 실패 ${wow_ordnum}:`, err);
+      failed++;
+    }
+  }
+
+  return { success, failed };
 }
