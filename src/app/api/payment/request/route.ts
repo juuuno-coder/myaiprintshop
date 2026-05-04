@@ -3,6 +3,8 @@ import { Order, OrderItem, PaymentRequestData } from '@/lib/payment';
 import { createOrder } from '@/lib/orders';
 import { createVendorOrders } from '@/lib/portone-settlement';
 import { getAllVendors } from '@/lib/vendors';
+import { getProductById } from '@/lib/products';
+import { WOWPRESS_VENDOR_ID } from '@/lib/wowpress/order-forwarder';
 
 // 주문 ID 생성 (Firestore 전용이 아닌 포트원 표시용으로 사용 가능)
 function generateOrderId(): string {
@@ -45,11 +47,29 @@ export async function POST(request: NextRequest) {
     const vendors = await getAllVendors('approved');
     const vendorsMap = new Map(vendors.map(v => [v.id, v]));
 
-    // items에 vendorId가 없으면 PLATFORM_DEFAULT로 설정
-    const itemsWithVendor = items.map(item => ({
-      ...item,
-      vendorId: item.vendorId || 'PLATFORM_DEFAULT',
-    }));
+    // 제품 정보 병렬 조회 (wowpressMapping 확보)
+    const productIds = [...new Set(items.map(i => i.productId))];
+    const productDocs = await Promise.all(productIds.map(id => getProductById(id)));
+    const productMap = new Map(
+      productDocs.filter(Boolean).map(p => [p!.id, p!])
+    );
+
+    // items에 vendorId + wowpressMapping + designFileUrl 설정
+    const itemsWithVendor = items.map(item => {
+      const product = productMap.get(item.productId);
+      return {
+        ...item,
+        vendorId: item.vendorId || product?.vendorId || 'PLATFORM_DEFAULT',
+        // WowPress 발주에 필요한 매핑 정보 (있으면 주입)
+        ...(product?.wowpressMapping
+          ? { wowpressMapping: product.wowpressMapping }
+          : {}),
+        // 고객 디자인 파일 URL (options.customDesign에서 가져옴)
+        ...(item.options?.customDesign
+          ? { designFileUrl: item.options.customDesign }
+          : {}),
+      };
+    });
 
     // vendorOrders 생성
     const vendorOrders = createVendorOrders(itemsWithVendor, vendorsMap);
