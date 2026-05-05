@@ -77,7 +77,7 @@ export async function syncWowPressProducts(): Promise<SyncResult> {
             price: 0,
             originalPrice: 0,
             thumbnail: `https://wowpress.co.kr/wow2.0/prod/images/${wowProduct.prodno}/${wowProduct.prodno}.jpg`,
-            images: [] as string[],
+            images: [`https://wowpress.co.kr/wow2.0/prod/images/${wowProduct.prodno}/${wowProduct.prodno}.jpg`] as string[],
             category: '인쇄',
             tags: ['인쇄', '와우프레스', wowProduct.prodname],
             badge: undefined as string | undefined,

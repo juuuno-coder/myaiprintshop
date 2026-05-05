@@ -1048,6 +1048,87 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       </AnimatePresence>
 
     </div>
+      {/* WowPress 인쇄 상품 상세 정보 */}
+      {isWowProduct && (
+        <div className="mt-16 border-t border-gray-100 pt-14">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest mb-6">
+            인쇄 상품 안내
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* 옵션 스펙 표 */}
+            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+              <h3 className="text-sm font-black text-gray-900 mb-4">상품 스펙</h3>
+              <table className="w-full text-sm">
+                <tbody className="divide-y divide-gray-100">
+                  {wowOptions?.sizes && wowOptions.sizes.length > 0 && (
+                    <tr>
+                      <td className="py-2.5 text-xs font-bold text-gray-400 w-20">규격</td>
+                      <td className="py-2.5 text-xs text-gray-700">
+                        {wowOptions.sizes.map(s => s.sizename).join(', ')}
+                      </td>
+                    </tr>
+                  )}
+                  {wowOptions?.colors && wowOptions.colors.length > 0 && (
+                    <tr>
+                      <td className="py-2.5 text-xs font-bold text-gray-400">도수</td>
+                      <td className="py-2.5 text-xs text-gray-700">
+                        {wowOptions.colors.map(c => c.colorname).join(', ')}
+                      </td>
+                    </tr>
+                  )}
+                  {wowOptions?.papers && wowOptions.papers.length > 0 && (
+                    <tr>
+                      <td className="py-2.5 text-xs font-bold text-gray-400">지질</td>
+                      <td className="py-2.5 text-xs text-gray-700">
+                        {[...new Set(wowOptions.papers.map(p => p.papername))].join(', ')}
+                      </td>
+                    </tr>
+                  )}
+                  <tr>
+                    <td className="py-2.5 text-xs font-bold text-gray-400">최소수량</td>
+                    <td className="py-2.5 text-xs text-gray-700">50부</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2.5 text-xs font-bold text-gray-400">납기</td>
+                    <td className="py-2.5 text-xs text-gray-700">영업일 기준 2~5일 (상품마다 상이)</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2.5 text-xs font-bold text-gray-400">배송비</td>
+                    <td className="py-2.5 text-xs text-gray-700">3,500원 (5만원 이상 무료)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* 파일 규격 안내 */}
+            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+              <h3 className="text-sm font-black text-gray-900 mb-4">파일 규격 안내</h3>
+              <ul className="space-y-2.5 text-xs text-gray-600">
+                <li className="flex gap-2"><span className="text-blue-500 font-bold shrink-0">•</span>파일 형식: PDF, AI, PSD (300dpi 이상 권장)</li>
+                <li className="flex gap-2"><span className="text-blue-500 font-bold shrink-0">•</span>색상 모드: CMYK (RGB 파일은 자동 변환)</li>
+                <li className="flex gap-2"><span className="text-blue-500 font-bold shrink-0">•</span>재단 여백(도련): 각 면 3mm 이상 추가</li>
+                <li className="flex gap-2"><span className="text-blue-500 font-bold shrink-0">•</span>중요 텍스트: 재단선 안쪽 3mm 이상 배치</li>
+                <li className="flex gap-2"><span className="text-blue-500 font-bold shrink-0">•</span>AI 디자인 생성 후 직접 편집 가능</li>
+              </ul>
+            </div>
+
+            {/* 주문 절차 */}
+            <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-2xl p-6 border border-indigo-100 md:col-span-2">
+              <h3 className="text-sm font-black text-gray-900 mb-4">주문 절차</h3>
+              <div className="flex flex-wrap gap-3">
+                {['① 옵션 선택 (규격·도수·지질)', '② 수량 입력 + 가격 확인', '③ AI 디자인 생성 or 파일 업로드', '④ 장바구니 → 결제', '⑤ 인쇄 → 배송 (2~5일)'].map((step, i) => (
+                  <div key={i} className="flex items-center gap-2 bg-white px-4 py-2.5 rounded-xl border border-indigo-100 shadow-sm">
+                    <span className="text-xs font-bold text-gray-700">{step}</span>
+                    {i < 4 && <span className="text-gray-300 hidden sm:inline">→</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Reviews Section — full-width 하단 */}
       <div className="mt-20 border-t border-gray-100 pt-16">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
