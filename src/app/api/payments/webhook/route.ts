@@ -164,6 +164,15 @@ export async function POST(req: NextRequest) {
       await sendOrderConfirmNotification(order);
       console.log(`[Webhook] Order ${orderId} confirmed`);
 
+      // WowPress 자동 발주 (비차단)
+      if (order) {
+        import('@/lib/wowpress/order-forwarder').then(({ forwardOrderToWowPress }) => {
+          forwardOrderToWowPress(order).catch(err =>
+            console.error('[Webhook] WowPress forwarding error:', err)
+          );
+        });
+      }
+
     } else if (payment.status === 'CANCELLED' || payment.status === 'PARTIAL_CANCELLED') {
       await updateOrder(orderId, {
         paymentStatus: 'CANCELLED',

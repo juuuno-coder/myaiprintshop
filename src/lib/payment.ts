@@ -48,6 +48,16 @@ export interface OrderItem {
     customOptions?: { groupLabel: string; valueLabel: string }[]; // 자동 견적 옵션 내역
   };
   vendorId?: string; // Phase 5: 판매자 ID
+  wowpressMapping?: {
+    prodno: number;
+    prodname?: string;
+    jobno: string;
+    sizeno: string;
+    colorno0: string;
+    paperno: string;
+    covercd?: number;
+  };
+  designFileUrl?: string;
 }
 
 // 판매자별 주문 (Phase 5: Multi-vendor)

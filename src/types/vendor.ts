@@ -138,6 +138,16 @@ export interface OrderItem {
     [key: string]: any;
   };
   vendorId?: string; // Phase 5 추가
+  wowpressMapping?: {
+    prodno: number;
+    prodname?: string;
+    jobno: string;
+    sizeno: string;
+    colorno0: string;
+    paperno: string;
+    covercd?: number;
+  };
+  designFileUrl?: string;
 }
 
 /**

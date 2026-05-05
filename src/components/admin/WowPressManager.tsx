@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Package, Search, Link2, CheckCircle2, AlertCircle, Loader2, ChevronRight, X, RefreshCw, Printer, Percent } from 'lucide-react';
+import { Package, Search, Link2, CheckCircle2, AlertCircle, Loader2, ChevronRight, X, RefreshCw, Printer, Percent, ClipboardList, RotateCcw } from 'lucide-react';
 
 // ─── 타입 ─────────────────────────────────────────────────────────────────────
 
@@ -75,6 +75,16 @@ export default function WowPressManager() {
   const [mapping, setMapping] = useState<Partial<WowMapping>>({});
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
+
+  // 탭
+  const [activeTab, setActiveTab] = useState<'mapping' | 'orders'>('mapping');
+
+  // 발주 현황
+  const [orderLogs, setOrderLogs] = useState<any[]>([]);
+  const [orderSummary, setOrderSummary] = useState<{ total: number; forwarded: number; failed: number; retried_success: number } | null>(null);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [orderFilter, setOrderFilter] = useState('');
+  const [retryingId, setRetryingId] = useState<string | null>(null);
 
   // 콜백 등록
   const [cbLoading, setCbLoading] = useState(false);
@@ -250,10 +260,176 @@ export default function WowPressManager() {
     }
   }
 
+  // 발주 현황 로드
+  const loadOrderLogs = useCallback(async () => {
+    setOrdersLoading(true);
+    try {
+      const url = orderFilter ? `/api/admin/wow/orders?status=${orderFilter}` : '/api/admin/wow/orders';
+      const res = await authFetch(url);
+      const data = await res.json();
+      if (data.success) {
+        setOrderLogs(data.logs);
+        setOrderSummary(data.summary);
+      }
+    } finally {
+      setOrdersLoading(false);
+    }
+  }, [orderFilter]);
+
+  useEffect(() => {
+    if (activeTab === 'orders') loadOrderLogs();
+  }, [activeTab, loadOrderLogs]);
+
+  // 단건 재시도
+  async function retryOrder(logId: string) {
+    setRetryingId(logId);
+    try {
+      const res = await authFetch('/api/admin/wow/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'retry', logId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        await loadOrderLogs();
+      }
+    } finally {
+      setRetryingId(null);
+    }
+  }
+
   // ─── 렌더 ───────────────────────────────────────────────────────────────────
 
   return (
     <div className="space-y-6">
+      {/* 탭 */}
+      <div className="flex gap-1 border-b border-gray-200">
+        {([
+          { id: 'mapping', label: '제품 매핑', icon: <Printer size={14} /> },
+          { id: 'orders', label: '발주 현황', icon: <ClipboardList size={14} /> },
+        ] as const).map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === tab.id
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            {tab.icon}{tab.label}
+            {tab.id === 'orders' && orderSummary?.failed ? (
+              <span className="ml-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                {orderSummary.failed}
+              </span>
+            ) : null}
+          </button>
+        ))}
+      </div>
+
+      {/* ── 발주 현황 탭 ── */}
+      {activeTab === 'orders' && (
+        <div className="space-y-4">
+          {/* 요약 카드 */}
+          {orderSummary && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[
+                { label: '전체', value: orderSummary.total, color: 'bg-gray-50 text-gray-700' },
+                { label: '발주완료', value: orderSummary.forwarded, color: 'bg-green-50 text-green-700' },
+                { label: '실패', value: orderSummary.failed, color: 'bg-red-50 text-red-700' },
+                { label: '재시도성공', value: orderSummary.retried_success, color: 'bg-blue-50 text-blue-700' },
+              ].map(s => (
+                <div key={s.label} className={`${s.color} rounded-xl p-3 text-center`}>
+                  <div className="text-2xl font-black">{s.value}</div>
+                  <div className="text-xs font-medium mt-0.5">{s.label}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* 필터 + 새로고침 */}
+          <div className="flex items-center gap-2">
+            <select
+              value={orderFilter}
+              onChange={e => setOrderFilter(e.target.value)}
+              className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">전체</option>
+              <option value="forwarded">발주완료</option>
+              <option value="failed">실패</option>
+              <option value="retried_success">재시도성공</option>
+            </select>
+            <button
+              onClick={loadOrderLogs}
+              disabled={ordersLoading}
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            >
+              {ordersLoading ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />}
+              새로고침
+            </button>
+          </div>
+
+          {/* 로그 목록 */}
+          {ordersLoading ? (
+            <div className="flex justify-center py-12"><Loader2 className="animate-spin text-blue-500" size={24} /></div>
+          ) : (
+            <div className="space-y-2">
+              {orderLogs.length === 0 && (
+                <div className="text-center py-12 text-gray-400 text-sm">발주 내역이 없습니다</div>
+              )}
+              {orderLogs.map((log: any) => {
+                const statusColor: Record<string, string> = {
+                  forwarded: 'bg-green-100 text-green-700',
+                  failed: 'bg-red-100 text-red-700',
+                  retried_success: 'bg-blue-100 text-blue-700',
+                };
+                const statusLabel: Record<string, string> = {
+                  forwarded: '발주완료',
+                  failed: '실패',
+                  retried_success: '재시도성공',
+                };
+                return (
+                  <div key={log.id} className="flex items-center gap-3 p-3.5 bg-white border border-gray-100 rounded-xl text-sm">
+                    <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full shrink-0 ${statusColor[log.status] ?? 'bg-gray-100 text-gray-600'}`}>
+                      {statusLabel[log.status] ?? log.status}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-gray-900 truncate">
+                        GOODZZ: <span className="font-mono text-xs">{log.goodzz_order_id}</span>
+                      </div>
+                      {log.wow_ordnum && (
+                        <div className="text-xs text-gray-500">WOW: {log.wow_ordnum}</div>
+                      )}
+                      {log.error && (
+                        <div className="text-xs text-red-500 truncate">{log.error}</div>
+                      )}
+                    </div>
+                    <div className="text-xs text-gray-400 shrink-0">
+                      {log.createdAt?.seconds
+                        ? new Date(log.createdAt.seconds * 1000).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+                        : ''}
+                    </div>
+                    {log.status === 'failed' && (
+                      <button
+                        onClick={() => retryOrder(log.id)}
+                        disabled={retryingId === log.id}
+                        className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-lg transition-colors disabled:opacity-50"
+                      >
+                        {retryingId === log.id ? <Loader2 size={11} className="animate-spin" /> : <RotateCcw size={11} />}
+                        재시도
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── 제품 매핑 탭 ── */}
+      {activeTab === 'mapping' && <>
+
       {/* 헤더 */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
@@ -586,6 +762,7 @@ export default function WowPressManager() {
           </div>
         </div>
       )}
+      </> /* end mapping tab */}
     </div>
   );
 }

@@ -263,6 +263,8 @@ export function createVendorOrders(
     quantity: number;
     options?: any;
     vendorId: string;
+    wowpressMapping?: any;
+    designFileUrl?: string;
   }>,
   vendorsMap: Map<string, Vendor>
 ): VendorOrder[] {
@@ -305,6 +307,8 @@ export function createVendorOrders(
         quantity: item.quantity,
         options: item.options,
         vendorId: item.vendorId,
+        ...(item.wowpressMapping ? { wowpressMapping: item.wowpressMapping } : {}),
+        ...(item.designFileUrl ? { designFileUrl: item.designFileUrl } : {}),
       })),
       subtotal,
       commission,
