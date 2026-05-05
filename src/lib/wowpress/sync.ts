@@ -17,6 +17,16 @@ import {
 
 export const VENDOR_WOWPRESS_ID = 'VENDOR_WOWPRESS';
 
+/**
+ * WowPress pathname 첫 번째 세그먼트 → GOODZZ category 값
+ * categories.ts dbValues와 반드시 일치해야 함
+ */
+export function pathnameToCategory(pathname: string): string {
+  const main = pathname.split('>')[0].trim();
+  // 그대로 Firestore category로 저장 — categories.ts dbValues에서 매칭
+  return main || '기타';
+}
+
 export interface SyncResult {
   synced: number;
   skipped: number;
@@ -78,7 +88,7 @@ export async function syncWowPressProducts(): Promise<SyncResult> {
             originalPrice: 0,
             thumbnail: `https://wowpress.co.kr/wow2.0/prod/images/${wowProduct.prodno}/${wowProduct.prodno}.jpg`,
             images: [`https://wowpress.co.kr/wow2.0/prod/images/${wowProduct.prodno}/${wowProduct.prodno}.jpg`] as string[],
-            category: '인쇄',
+            category: pathnameToCategory(wowProduct.pathname),
             tags: ['인쇄', '와우프레스', wowProduct.prodname],
             badge: undefined as string | undefined,
             stock: 9999,

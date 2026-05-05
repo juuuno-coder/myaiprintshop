@@ -1,94 +1,100 @@
 /**
  * 카테고리 통합 관리
  * URL slug와 실제 DB 카테고리명 매핑 + 하위 카테고리 지원
+ *
+ * dbValues는 Firestore에 저장되는 category 필드 값과 일치해야 함.
+ * WowPress 상품의 category는 pathname 첫 번째 세그먼트를 그대로 사용.
  */
 
 export interface SubCategory {
-  slug: string; // 하위 카테고리 URL slug
-  label: string; // UI에 표시되는 한글 레이블
-  dbValue: string; // Firestore에 저장되는 실제 카테고리명
+  slug: string;
+  label: string;
+  dbValue: string;
 }
 
 export interface Category {
-  slug: string; // URL에 사용되는 영문 slug
-  label: string; // UI에 표시되는 한글 레이블
-  dbValues: string[]; // Firestore에 저장된 실제 카테고리명 (복수 가능)
-  subcategories?: SubCategory[]; // 하위 카테고리 (선택사항)
+  slug: string;
+  label: string;
+  dbValues: string[];
+  subcategories?: SubCategory[];
 }
 
 export const CATEGORIES: Category[] = [
   {
     slug: 'business-card',
     label: '명함',
-    dbValues: ['명함', '인쇄']
+    dbValues: ['명함'],
   },
   {
     slug: 'sticker',
     label: '스티커',
-    dbValues: ['스티커']
+    dbValues: ['스티커', '자석제품'],
   },
   {
     slug: 'flyer',
     label: '전단지/리플렛',
-    dbValues: ['전단지', '리플렛', '팜플렛']
+    dbValues: ['전단', '홍보물', '디지털인쇄', '서식류', '시스템상품'],
   },
   {
-    slug: 'fashion',
-    label: '의류/패션',
-    dbValues: ['의류', '패션', '패션/어패럴']
-  },
-  {
-    slug: 'living',
-    label: '홈/리빙',
-    dbValues: ['홈/리빙', '리빙']
-  },
-  {
-    slug: 'tech',
-    label: '테크/액세서리',
-    dbValues: ['테크', '테크/가전']
+    slug: 'signage',
+    label: '사인/배너',
+    dbValues: ['사인제품', '부자재'],
   },
   {
     slug: 'goods',
     label: '굿즈/팬시',
-    dbValues: ['굿즈', '굿즈/팬시', '문구', '잡화', '인테리어']
+    dbValues: [
+      '굿즈/다꾸', '판촉물', '팬시제품', '굿즈',
+      '포토/액자', '캘린더', '행택/쿠폰/안내장',
+      '홀더', '책자', '선거홍보물', '와우기획상품',
+      '★비즈하우스 전용제품',
+    ],
+  },
+  {
+    slug: 'fashion',
+    label: '의류/패션',
+    dbValues: ['어패럴', '의류', '패션', '패션/어패럴'],
+  },
+  {
+    slug: 'living',
+    label: '홈/리빙',
+    dbValues: ['홈/리빙', '리빙', '카페용품'],
+  },
+  {
+    slug: 'tech',
+    label: '테크/액세서리',
+    dbValues: ['테크', '테크/가전', '폰 액세서리'],
   },
   {
     slug: 'packaging',
-    label: '포장박스',
-    dbValues: ['포장박스', '패키지', '쇼핑백']
-  }
+    label: '봉투/패키지',
+    dbValues: ['봉투', '포장박스', '패키지', '쇼핑백'],
+  },
 ];
 
-// Slug로 카테고리 찾기
 export function getCategoryBySlug(slug: string): Category | undefined {
   return CATEGORIES.find(cat => cat.slug === slug);
 }
 
-// Slug로 DB 카테고리명 배열 가져오기
 export function getDbCategories(slug: string): string[] {
   const category = getCategoryBySlug(slug);
   return category ? category.dbValues : [];
 }
 
-// 모든 카테고리의 slug와 label 가져오기 (네비게이션용)
 export function getAllCategories(): Array<{ slug: string; label: string; subcategories?: SubCategory[] }> {
   return CATEGORIES.map(cat => ({
     slug: cat.slug,
     label: cat.label,
-    subcategories: cat.subcategories
+    subcategories: cat.subcategories,
   }));
 }
 
-// 서브카테고리 slug로 DB 값 찾기
 export function getSubCategoryDbValue(categorySlug: string, subSlug: string): string | undefined {
   const category = getCategoryBySlug(categorySlug);
-  if (!category || !category.subcategories) return undefined;
-
-  const sub = category.subcategories.find(s => s.slug === subSlug);
-  return sub?.dbValue;
+  if (!category?.subcategories) return undefined;
+  return category.subcategories.find(s => s.slug === subSlug)?.dbValue;
 }
 
-// 모든 서브카테고리 포함한 카테고리 트리 가져오기
 export function getCategoryTree(): Category[] {
   return CATEGORIES;
 }
