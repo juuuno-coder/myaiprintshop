@@ -28,6 +28,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'cdn.webeasy.co.kr',
       },
+      {
+        protocol: 'https',
+        hostname: 'wowpress.co.kr',
+      },
     ],
   },
 
