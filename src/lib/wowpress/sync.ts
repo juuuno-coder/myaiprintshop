@@ -76,7 +76,7 @@ export async function syncWowPressProducts(): Promise<SyncResult> {
             description: `${wowProduct.prodname} 인쇄 상품 — 와우프레스`,
             price: 0,
             originalPrice: 0,
-            thumbnail: '/images/wow-products/default.png',
+            thumbnail: `https://wowpress.co.kr/wow2.0/prod/images/${wowProduct.prodno}/${wowProduct.prodno}.jpg`,
             images: [] as string[],
             category: '인쇄',
             tags: ['인쇄', '와우프레스', wowProduct.prodname],

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Package, Search, Link2, CheckCircle2, AlertCircle, Loader2, ChevronRight, X, RefreshCw, Printer } from 'lucide-react';
+import { Package, Search, Link2, CheckCircle2, AlertCircle, Loader2, ChevronRight, X, RefreshCw, Printer, Percent } from 'lucide-react';
 
 // ─── 타입 ─────────────────────────────────────────────────────────────────────
 
@@ -84,6 +84,12 @@ export default function WowPressManager() {
   const [syncLoading, setSyncLoading] = useState(false);
   const [syncResult, setSyncResult] = useState<{ synced: number; total: number; errors: string[] } | null>(null);
 
+  // 마진율 설정
+  const [marginInput, setMarginInput] = useState('115'); // 115 = 1.15배
+  const [marginSaving, setMarginSaving] = useState(false);
+  const [marginMsg, setMarginMsg] = useState('');
+  const [currentMarginRate, setCurrentMarginRate] = useState(1.15);
+
   // GOODZZ 제품 목록 로드
   const loadProducts = useCallback(async () => {
     setLoading(true);
@@ -97,6 +103,19 @@ export default function WowPressManager() {
   }, []);
 
   useEffect(() => { loadProducts(); }, [loadProducts]);
+
+  // 마진율 초기 로드
+  useEffect(() => {
+    authFetch('/api/admin/wow/settings')
+      .then(r => r.json())
+      .then(d => {
+        if (d.settings?.globalMarginRate) {
+          setCurrentMarginRate(d.settings.globalMarginRate);
+          setMarginInput(String(Math.round(d.settings.globalMarginRate * 100)));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const filtered = products.filter(p =>
     p.name.toLowerCase().includes(search.toLowerCase())
@@ -195,6 +214,27 @@ export default function WowPressManager() {
     }
   }
 
+  // 마진율 저장
+  async function saveMargin() {
+    const rate = Number(marginInput) / 100;
+    if (rate < 1.0 || rate > 5.0) { setMarginMsg('100~500 사이 입력'); return; }
+    setMarginSaving(true);
+    setMarginMsg('');
+    try {
+      await authFetch('/api/admin/wow/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ globalMarginRate: rate }),
+      });
+      setCurrentMarginRate(rate);
+      setMarginMsg(`저장 완료 (원가 × ${rate} 적용)`);
+    } catch {
+      setMarginMsg('저장 실패');
+    } finally {
+      setMarginSaving(false);
+    }
+  }
+
   // 콜백 URL 등록
   async function registerCallback() {
     setCbLoading(true);
@@ -248,6 +288,34 @@ export default function WowPressManager() {
             </span>
           )}
         </div>
+      </div>
+
+      {/* 전체 마진율 설정 */}
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center gap-4 flex-wrap">
+        <div className="flex items-center gap-2">
+          <Percent size={16} className="text-blue-600" />
+          <span className="text-sm font-bold text-blue-900">전체 마진율</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            min={100} max={500} step={1}
+            value={marginInput}
+            onChange={e => setMarginInput(e.target.value)}
+            className="w-20 px-3 py-1.5 border-2 border-blue-300 rounded-lg text-sm font-bold text-center focus:border-blue-600 focus:outline-none"
+          />
+          <span className="text-sm text-blue-700">% (110 = 원가×1.1 = 10% 이익)</span>
+        </div>
+        <button
+          onClick={saveMargin}
+          disabled={marginSaving}
+          className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition-colors disabled:opacity-50 flex items-center gap-1"
+        >
+          {marginSaving ? <Loader2 size={12} className="animate-spin" /> : null}
+          저장
+        </button>
+        {marginMsg && <span className="text-xs text-blue-700">{marginMsg}</span>}
+        <span className="text-xs text-blue-500 ml-auto">현재: 원가 × {currentMarginRate} ({Math.round((currentMarginRate - 1) * 100)}% 마진)</span>
       </div>
 
       {/* 검색 */}

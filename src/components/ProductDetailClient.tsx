@@ -45,6 +45,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   // WowPress 실시간 가격 상태
   const [wowPrice, setWowPrice] = useState<number | null>(null);
   const [wowLoading, setWowLoading] = useState(false);
+  const [globalMarginRate, setGlobalMarginRate] = useState(1.15);
 
   // 자동 동기화 WowPress 상품: 선택 가능한 옵션 (규격/도수/지질)
   const wowOptions = isWowProduct ? (product.metadata?.wowOptions as {
@@ -72,6 +73,14 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     if (firstPaper) setSelectedWowPaper(firstPaper);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedWowSize]);
+
+  // globalMarginRate 로드 (WowPress 상품인 경우에만)
+  useEffect(() => {
+    if (!isWowProduct) return;
+    import('@/lib/wowpress/settings').then(({ getWowSettings }) => {
+      getWowSettings().then(s => setGlobalMarginRate(s.globalMarginRate));
+    });
+  }, [isWowProduct]);
   
   // AI & Order State
   const [orderMethod, setOrderMethod] = useState<'self' | 'request' | 'upload'>('self');
@@ -168,12 +177,10 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         });
         const data = await res.json();
         if (data.success && data.price?.totprc) {
-          // 자동 동기화 상품(price=0)은 WowPress 원가 그대로, 벤더 매핑 상품은 마진율 적용
-          const costBase = (product.metadata?.costPrice as number) || 0;
-          const marginRate = (costBase > 0 && product.price > 0)
-            ? (product.price - costBase) / costBase
-            : 0;
-          const newSellPrice = Math.ceil(data.price.totprc * (1 + marginRate));
+          // 상품별 마진율 override → 없으면 globalMarginRate 적용
+          const productMarginRate = product.metadata?.wowMarginRate as number | undefined;
+          const effectiveMargin = productMarginRate ?? globalMarginRate;
+          const newSellPrice = Math.ceil(data.price.totprc * effectiveMargin);
           setWowPrice(newSellPrice);
         }
       } catch {
@@ -184,7 +191,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     }, 400);
     return () => clearTimeout(timer);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [quantity, selectedWowSize, selectedWowColor, selectedWowPaper, isWowProduct]);
+  }, [quantity, selectedWowSize, selectedWowColor, selectedWowPaper, isWowProduct, globalMarginRate]);
 
   useEffect(() => {
     const fetchReviews = async () => {
