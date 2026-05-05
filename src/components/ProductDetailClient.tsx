@@ -47,32 +47,30 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const [wowLoading, setWowLoading] = useState(false);
   const [globalMarginRate, setGlobalMarginRate] = useState(1.15);
 
-  // 자동 동기화 WowPress 상품: 선택 가능한 옵션 (규격/도수/지질)
+  // 자동 동기화 WowPress 상품: 선택 가능한 옵션 (규격/도수/지질/후가공)
   const wowOptions = isWowProduct ? (product.metadata?.wowOptions as {
-    sizes: { sizeno: string; sizename: string; jobno: string }[];
-    colors: { colorno: string; colorname: string }[];
-    papers: { sizeno: string; paperno: string; papername: string }[];
+    sizes: { sizeno: number; sizename: string; width: number; height: number }[];
+    colors: { colorno: number; colorname: string; jobno: number | string }[];
+    papers: { paperno: number; papername: string }[];
+    awkJobs?: { jobgroupno: number; jobgroup: string; type: string; jobno: number; jobname: string }[];
+    ordQtyList?: number[];
   } | undefined) : undefined;
 
   const [selectedWowSize, setSelectedWowSize] = useState<string>(
-    wowOptions?.sizes[0]?.sizeno ?? product.wowpressMapping?.sizeno ?? ''
+    String(wowOptions?.sizes[0]?.sizeno ?? product.wowpressMapping?.sizeno ?? '')
   );
   const [selectedWowColor, setSelectedWowColor] = useState<string>(
-    wowOptions?.colors[0]?.colorno ?? product.wowpressMapping?.colorno0 ?? ''
+    String(wowOptions?.colors[0]?.colorno ?? product.wowpressMapping?.colorno0 ?? '')
   );
-  const [selectedWowPaper, setSelectedWowPaper] = useState<string>(() => {
-    const firstSizeno = wowOptions?.sizes[0]?.sizeno ?? '';
-    return wowOptions?.papers.find(p => p.sizeno === firstSizeno)?.paperno
-      ?? product.wowpressMapping?.paperno ?? '';
-  });
+  const [selectedWowPaper, setSelectedWowPaper] = useState<string>(
+    String(wowOptions?.papers[0]?.paperno ?? product.wowpressMapping?.paperno ?? '')
+  );
+  const [selectedAwkJobs, setSelectedAwkJobs] = useState<Set<string>>(new Set());
 
-  // 규격 변경 시 지질 초기화
-  useEffect(() => {
-    if (!wowOptions) return;
-    const firstPaper = wowOptions.papers.find(p => p.sizeno === selectedWowSize)?.paperno;
-    if (firstPaper) setSelectedWowPaper(firstPaper);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedWowSize]);
+  // ordQtyList 기반 수량 프리셋
+  const wowQtyPresets = wowOptions?.ordQtyList?.length
+    ? wowOptions.ordQtyList
+    : [100, 200, 300, 500, 1000, 2000, 3000, 5000];
 
   // globalMarginRate 로드 (WowPress 상품인 경우에만)
   useEffect(() => {
@@ -155,7 +153,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     const mapping = product.wowpressMapping;
 
     // 동적 옵션 상품은 선택된 규격의 jobno를, 고정 상품은 mapping.jobno 사용
-    const jobno = wowOptions?.sizes.find(s => s.sizeno === selectedWowSize)?.jobno ?? mapping.jobno;
+    // jobno는 선택된 도수(color)의 req_prsjob에서 가져옴
+    const jobno = wowOptions?.colors.find(c => String(c.colorno) === selectedWowColor)?.jobno ?? mapping.jobno;
     const sizeno = wowOptions ? selectedWowSize : mapping.sizeno;
     const colorno0 = wowOptions ? selectedWowColor : mapping.colorno0;
     const paperno = wowOptions ? selectedWowPaper : mapping.paperno;
@@ -650,25 +649,28 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
         {/* Quantity and Variations (Matches real site) */}
         <div className="pt-6 border-t border-gray-100 space-y-4">
-          {/* WowPress 자동 동기화 상품: 규격/도수/지질 선택 */}
+          {/* WowPress 자동 동기화 상품: 규격/도수/지질/후가공 선택 */}
           {isWowProduct && wowOptions && (
-            <div className="space-y-3 pb-4 border-b border-gray-100">
+            <div className="space-y-4 pb-4 border-b border-gray-100">
               {/* 규격 선택 */}
               {wowOptions.sizes.length > 0 && (
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-gray-400">규격</label>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">규격</label>
                   <div className="flex flex-wrap gap-2">
                     {wowOptions.sizes.map(size => (
                       <button
                         key={size.sizeno}
-                        onClick={() => setSelectedWowSize(size.sizeno)}
+                        onClick={() => setSelectedWowSize(String(size.sizeno))}
                         className={`px-3 py-1.5 rounded-xl text-xs font-bold border-2 transition-all ${
-                          selectedWowSize === size.sizeno
+                          selectedWowSize === String(size.sizeno)
                             ? 'bg-indigo-600 text-white border-indigo-600'
                             : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'
                         }`}
                       >
                         {size.sizename}
+                        {size.width > 0 && size.height > 0 && (
+                          <span className="ml-1 opacity-60 text-[10px]">({size.width}×{size.height})</span>
+                        )}
                       </button>
                     ))}
                   </div>
@@ -677,14 +679,14 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               {/* 도수 선택 */}
               {wowOptions.colors.length > 0 && (
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-gray-400">도수</label>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">도수</label>
                   <div className="flex flex-wrap gap-2">
                     {wowOptions.colors.map(color => (
                       <button
                         key={color.colorno}
-                        onClick={() => setSelectedWowColor(color.colorno)}
+                        onClick={() => setSelectedWowColor(String(color.colorno))}
                         className={`px-3 py-1.5 rounded-xl text-xs font-bold border-2 transition-all ${
-                          selectedWowColor === color.colorno
+                          selectedWowColor === String(color.colorno)
                             ? 'bg-indigo-600 text-white border-indigo-600'
                             : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'
                         }`}
@@ -695,26 +697,52 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                   </div>
                 </div>
               )}
-              {/* 지질 선택 (규격에 따라 필터) */}
-              {wowOptions.papers.filter(p => p.sizeno === selectedWowSize).length > 0 && (
+              {/* 지질 선택 */}
+              {wowOptions.papers.length > 0 && (
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-gray-400">지질</label>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">지질</label>
                   <div className="flex flex-wrap gap-2">
-                    {wowOptions.papers
-                      .filter(p => p.sizeno === selectedWowSize)
-                      .map(paper => (
-                        <button
-                          key={paper.paperno}
-                          onClick={() => setSelectedWowPaper(paper.paperno)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold border-2 transition-all ${
-                            selectedWowPaper === paper.paperno
-                              ? 'bg-indigo-600 text-white border-indigo-600'
-                              : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'
-                          }`}
-                        >
-                          {paper.papername}
-                        </button>
-                      ))}
+                    {wowOptions.papers.map(paper => (
+                      <button
+                        key={paper.paperno}
+                        onClick={() => setSelectedWowPaper(String(paper.paperno))}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold border-2 transition-all ${
+                          selectedWowPaper === String(paper.paperno)
+                            ? 'bg-indigo-600 text-white border-indigo-600'
+                            : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'
+                        }`}
+                      >
+                        {paper.papername}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {/* 후가공 선택 (있는 경우만) */}
+              {wowOptions.awkJobs && wowOptions.awkJobs.length > 0 && (
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">후가공 (선택)</label>
+                  <div className="flex flex-wrap gap-2">
+                    {wowOptions.awkJobs.map(awk => (
+                      <button
+                        key={awk.jobno}
+                        onClick={() => {
+                          setSelectedAwkJobs(prev => {
+                            const next = new Set(prev);
+                            const key = String(awk.jobno);
+                            next.has(key) ? next.delete(key) : next.add(key);
+                            return next;
+                          });
+                        }}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold border-2 transition-all ${
+                          selectedAwkJobs.has(String(awk.jobno))
+                            ? 'bg-amber-500 text-white border-amber-500'
+                            : 'bg-white text-gray-700 border-gray-200 hover:border-amber-300'
+                        }`}
+                      >
+                        {awk.jobgroup !== awk.jobname ? `${awk.jobgroup} - ${awk.jobname}` : awk.jobname}
+                      </button>
+                    ))}
                   </div>
                 </div>
               )}
@@ -724,9 +752,11 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           {isWowProduct ? (
             /* WowPress 인쇄 상품: 수량 프리셋 버튼 */
             <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-400">인쇄 수량 (최소 50개)</label>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">
+                인쇄 수량 (최소 {wowQtyPresets[0]?.toLocaleString() ?? 100}개)
+              </label>
               <div className="flex flex-wrap gap-2">
-                {[50, 100, 200, 300, 500, 1000, 2000, 3000, 5000].map(qty => (
+                {wowQtyPresets.map(qty => (
                   <button
                     key={qty}
                     onClick={() => setQuantity(qty)}
@@ -743,13 +773,12 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               <div className="flex items-center gap-2 mt-1">
                 <input
                   type="number"
-                  min={50}
-                  max={5000}
+                  min={wowQtyPresets[0] ?? 100}
                   value={quantity}
-                  onChange={(e) => setQuantity(Math.max(50, Math.min(5000, parseInt(e.target.value) || 50)))}
+                  onChange={(e) => setQuantity(Math.max(wowQtyPresets[0] ?? 100, parseInt(e.target.value) || (wowQtyPresets[0] ?? 100)))}
                   className="w-28 px-3 py-2 border-2 border-gray-200 rounded-xl text-sm font-bold focus:border-indigo-500 focus:outline-none"
                 />
-                <span className="text-xs text-gray-400">직접 입력 (50~5000)</span>
+                <span className="text-xs text-gray-400">직접 입력</span>
               </div>
             </div>
           ) : (
@@ -1081,7 +1110,15 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                     <tr>
                       <td className="py-2.5 text-xs font-bold text-gray-400">지질</td>
                       <td className="py-2.5 text-xs text-gray-700">
-                        {[...new Set(wowOptions.papers.map(p => p.papername))].join(', ')}
+                        {wowOptions.papers.map(p => p.papername).join(', ')}
+                      </td>
+                    </tr>
+                  )}
+                  {wowOptions?.awkJobs && wowOptions.awkJobs.length > 0 && (
+                    <tr>
+                      <td className="py-2.5 text-xs font-bold text-gray-400">후가공</td>
+                      <td className="py-2.5 text-xs text-gray-700">
+                        {[...new Set(wowOptions.awkJobs.map(a => a.jobgroup))].join(', ')}
                       </td>
                     </tr>
                   )}

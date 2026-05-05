@@ -25,9 +25,12 @@ export interface WowResponse<T = unknown> {
 
 export interface WowProduct {
   prodno: number;
-  prodname: string;
+  name: string;       // API 실제 필드명 (prodname 아님)
   pathname: string;
+  path_name: string;  // 전체 경로 (WOW2.0 > ...)
   useyn: 'Y' | 'N';
+  pjoin: number;
+  prdclass: string;   // "P"=인쇄, "S"=샘플/기타
   cdt: string;
 }
 
